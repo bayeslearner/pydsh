@@ -502,12 +502,12 @@ returns a verdict rather than a raw echo of the offending value.
 
 ## Tasks
 
-- [ ] 1. Foundation — the shared vocabulary
-  - [ ] 1.1 `message/blocks.py` — content blocks, `MessageSource`, `Message`
+- [x] 1. Foundation — the shared vocabulary
+  - [x] 1.1 `message/blocks.py` — content blocks, `MessageSource`, `Message`
     - Four frozen block kinds, `as_text`, the two constructors.
     - **Depends**: —
     - **Requirements**: 1.1, 1.2, 1.3
-  - [ ] 1.2 `message/payload.py` — `encode_payload` / `decode_payload`
+  - [x] 1.2 `message/payload.py` — `encode_payload` / `decode_payload`
     - Tagged encoding, recursive, raising on unknown tags.
     - **Depends**: 1.1
     - **Requirements**: 1.4, 1.5
@@ -550,7 +550,7 @@ returns a verdict rather than a raw echo of the offending value.
     - **Requirements**: 6.1, 6.2, 6.3
 
 - [ ] 4. Tests
-  - [ ] 4.1 `test_message.py` — vocabulary + round-trip property
+  - [x] 4.1 `test_message.py` — vocabulary + round-trip property
     - **Depends**: 1.2
     - **Requirements**: 1.1–1.5
     - **Properties**: 2
