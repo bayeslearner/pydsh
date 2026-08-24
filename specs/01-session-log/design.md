@@ -317,8 +317,8 @@ verification is behavior, not a unit-test reflex):
 
 ## Retirement of Superseded Features
 
-None — this repo is new; this sprint replaces nothing. (The consumers'
-backends, prismi3-agent and SAW, are retired by their own repos.)
+None — this repo is new; this sprint replaces nothing. (A consumer's existing
+backend is retired by that consumer's own repo, never from here.)
 
 ## Decisions
 

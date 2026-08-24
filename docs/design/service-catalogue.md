@@ -16,7 +16,7 @@ all ✅. This catalogue is that map, re-generated against pydsh's kernel choice:
 Layer 0 (`context`, `fiber`, `reflect`, `registry`, `service`, `events`,
 `logger`, `signal`, `loader`, `hmr`, `schema`) is **plugkit-shipped**, every seam
 and support service is **core**, Layer 4 is **app-layer**, the provider
-adapters are **provider-domain**, and prismi3-shaped concepts are
+adapters are **provider-domain**, and application-shaped concepts are
 **consumer-domain**.
 
 ## Coverage classes
@@ -162,14 +162,16 @@ prompt. A port that skips them loses the proof that the injection seam works.
 
 ## What is consciously NOT ported into core
 
-These are consumer-domain (prismi3's own plugins), per the generality rule —
-excluding them is the point, not a gap:
+These are consumer-domain — a consuming application's own plugins — per the
+generality rule. Excluding them is the point, not a gap:
 
-- **Auth / identity / roles** (prismi3 JWT/roles) — reference has none; consumer's plugin.
-- **CaseStore / conversation snapshots / workspace `_apps/` / artifacts-as-blobs**
-  (prismi3 domain) — consumer's domain, built on the general seams.
-- **`safe_invoke` role gate** — the general `tools/*` pipeline is provided; the prismi3
-  *roles* part is a `guard`/`approver` the consumer writes.
+- **Auth / identity / roles** (JWT, group-based permissions) — the reference has
+  none either; it belongs in the consumer's plugin.
+- **Domain record stores** (cases, conversation snapshots, workspace app
+  directories, artifacts-as-blobs) — a consumer's domain, built *on* the general
+  seams rather than inside them.
+- **A role-gated safe-invoke** — the general `tools/*` pipeline is provided here;
+  the roles half is a `guard`/`approver` the consumer writes.
 
 ## General rule (the how)
 

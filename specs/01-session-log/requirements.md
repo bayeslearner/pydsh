@@ -26,8 +26,8 @@ anchors: [data-architecture, service-catalogue]
 This is the first sprint of a Python port of DeepSeek Harness's service layer,
 built on the plugkit kernel (the port of Cordis that the TypeScript original's
 documentation describes accurately). The port's long-term target is to replace
-the backends of **prismi3-agent** and **SAW**; those repos' own sprints own the
-retirement, this repo owns the service layer.
+hand-rolled agent backends with a general service layer; a consumer's own
+sprints own its retirement, this repo owns the service layer.
 
 This sprint builds the foundation every other service projects from: the
 event-sourced session log (the `core/session` seam of the reference) plus its
@@ -74,7 +74,7 @@ when the process restarts, and whose full history can be replayed."
 ## Decisions & Corrections (log)
 
 - 2026-08-24 — Owner directed: SQLite-backed persistence (not JSONL, the
-  reference's default), with prismi3-agent and SAW as the adoption target.
+  reference's default), with consuming applications as the adoption target.
   Scope of sprint 01 is the session log + persistence only; the loop, tools,
   and adapters are later sprints.
 - 2026-08-24 — Session log is the only store in this sprint, so persistence is
@@ -169,4 +169,4 @@ the TS source — can be extended here.
   log's surface projection is sufficient until compaction exists. Surface
   metadata fields are defined but only `append` is exercised now.
 - Forking (`ctx.sessions.fork`) and subagent lineage — later sprint.
-- The prismi3-agent / SAW backend retirement — owned by those repos.
+- Retiring any consumer's existing backend — owned by that consumer's repo.

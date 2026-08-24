@@ -11,9 +11,9 @@ event dispatch) or where a layer is consumer-domain (auth/roles, domain cases,
 workspace apps) and does not belong in a general core. Coverage classes are
 defined in [`docs/design/service-catalogue.md`](docs/design/service-catalogue.md).
 
-Adoption targets: the backends of **prismi3-agent** and **SAW** will be
-refactored onto this port. Their users/roles/cases stay their own plugins above
-the general seams.
+A consumer mounts these seams and keeps its own domain — users, roles, cases,
+workspace apps — as plugins above them. That split is the point: the core stays
+general, and nothing consumer-shaped is built into it.
 
 ## Using it
 

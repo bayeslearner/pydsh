@@ -35,8 +35,8 @@ immediately and loudly.
 
 ## What the port project is
 
-- A Python port of the DeepSeek Harness service layer on plugkit; adoption
-  targets are prismi3-agent and SAW.
+- A Python port of the DeepSeek Harness service layer on plugkit, adopted by
+  consuming applications that keep their own domain above its seams.
 - The **coverage contract** is `docs/design/service-catalogue.md`: port 100% of
   the dsh-python surface except plugkit-shipped (tool registry, event dispatch)
   and consumer-domain (auth/roles, cases, workshop apps). Build order is

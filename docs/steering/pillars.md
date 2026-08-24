@@ -1,7 +1,8 @@
 # Pillars — how pydsh (Python) succeeds
 
 A Python port of DeepSeek Harness's service layer, built on the plugkit
-kernel. It is a drop-in backend for prismi3-agent and SAW.
+kernel. It is a drop-in backend for any consumer that needs the seams rather
+than a framework.
 
 | Pillar | Current state | Healthy when |
 |---|---|---|
@@ -11,7 +12,7 @@ kernel. It is a drop-in backend for prismi3-agent and SAW.
 | **Design / Arch** | `data-architecture.md` complete for the storage tier; `service-catalogue.md` verified module-by-module against the reference, with no uncovered module. | Data-lifecycle table complete; every store has a writer, read path, and reproducibility guarantee. |
 | **Packaging** | Installable from a git tag; the kernel is pinned so a consumer gets it automatically. Verified by installing into a clean environment, not by trusting a local checkout. | A consumer adds one dependency and gets a working kernel with it — no local path, no manual kernel clone. |
 | **Documentation** | README states what actually works and what deliberately does not; the reference checkouts and the porting method are written down. | README + dev guide; the port's service catalogue mapped to the TS reference. |
-| **Adoption** | Not started — no consumer has migrated. | prismi3-agent and SAW consume this backend instead of their own. |
+| **Adoption** | Not started — no consumer has migrated. | A consumer runs on these seams instead of its own hand-rolled backend, keeping only its domain above them. |
 
 Standing targets (retirement of consumers' backends is owned by those repos' own
 sprints, not here).

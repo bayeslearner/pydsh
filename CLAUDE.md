@@ -1,7 +1,14 @@
 # CLAUDE.md — how to work on this project
 
 This repo is a Python port of the DeepSeek Harness service layer, built on the
-plugkit kernel. Long-term adoption targets: prismi3-agent and SAW.
+plugkit kernel. It is a general core: consumers mount its seams and keep their
+own domain above them.
+
+**This repo never names a consumer.** No file here records a downstream
+project, its paths, or its status — the dependency runs one way, and a
+reference that tracks its consumers inverts the architecture it exists to
+establish. Write about "a consumer" and let that project's own docs name
+itself.
 
 ## Starting a session
 
