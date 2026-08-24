@@ -39,6 +39,37 @@ That map is a good "which services exist" catalogue and is already reflected in 
 [reference package list](#reference-service-catalogue). The port's job is to reproduce the
 *surface and semantics* of these seams on plugkit, not to copy dsh-python's code.
 
+### Semantics worth copying verbatim (from the seam survey)
+
+These are the recurring, hard-won contracts the port should preserve so downstream
+`pi_ai`/`prismi3`-shaped consumers replace a plugin, not core:
+
+- **Session**: every `append()` emits `session/event` (session, event) — the single bus all
+  other seams (projection, stats, cache, checkpoint, long-term-memory) subscribe to.
+  `SessionEvent{type, seq(1-based monotonic), time, data}`. `assistant/message` data is
+  `{"turn","step","message","usage"}`; surface = `{nodes:[seqs], replace_generation}`;
+  `derive_messages()` projects `user/message`→data, `assistant/message`→`data["message"]`,
+  `tool/result`→`data["message"]`.
+- **LLM**: `ctx.llm.register_adapter(providers, adapter)` all-or-nothing route commit +
+  `handle.replace()` atomic re-route + `llm/adapters-updated`; `stream()` runs the
+  `llm/stream` waterfall around the adapter; chunk types drive a `BlockAssembler`
+  (`block-start/text-delta/…/usage/finish`). `call_config` is a 3-layer merge:
+  provider defaults < session header (persisted) < per-request. `attribution` mandates a
+  User-Agent on every provider request.
+- **Agent/turn-step**: pre-step `agent/pre-step` waterfall → `enter|reject`; `agent/request-error`
+  waterfall → `{"kind":"retry"}`; bounded `max_steps`/`max-tokens`; tool calls via
+  `tools/execute` then `tools/post-execute` **waterfalls** whose listeners are the guards
+  (repeat-tool, timeout) and enrichment (spill). Agent registry + pluggable loop factory
+  (swap the loop = re-`set_factory`).
+- **Inbox**: two queues (`next-turn`, `next-step`); every mutation writes an
+  `agent/inbox/spliced` session event so the inbox is replayable across restarts.
+- **Projection cache**: "a folding shortcut, never the authority" — a row may be stale (its
+  `seq` says how old) but never wrong; write path fail-soft.
+- **Dependency clamps**: the four seams are pure stdlib except the transport boundary
+  (`httpx` in adapters/MCP client, optional `zstandard` for sqlite compression, `websockets`
+  for a gateway), all behind lazy imports. The port should keep that split: stdlib core,
+  transport at the adapter boundary.
+
 ## Key lever: plugkit already ships core seams
 
 plugkit (the kernel) ships, as ordinary mountable services:

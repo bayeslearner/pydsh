@@ -33,6 +33,22 @@ must never read storage state the log cannot reproduce. The surface is
 incrementally maintained in memory and rebuilt from scratch on load — never
 persisted as a separate source of truth.
 
+## Durability contract (reference) 
+
+The reference fixes the durability checkpoint on two events, and the port
+adopts them verbatim (they are plugkit event-dispatch modes):
+
+- **`session/event`** — emit (fire-and-forget append feed). Post-commit; the
+  listener snapshot resolves before the log push; observer failures are logged
+  and contained without failing the committed append.
+- **`session/flush`** — **parallel** (awaited durability checkpoint). Every
+  listener runs and the caller awaits all of them. The SQLite persistence
+  backend subscribes here so a caller awaits the disk write.
+
+Consequence for design: persistence is a *listener* on `session/flush`, not a
+direct call out of `SessionStore.flush()`; `flush` fans out and awaits the
+backend.
+
 ## Storage-engine choice
 
 **SQLite** (`sqlite3` stdlib, WAL mode, one row per event) is the engine, per
