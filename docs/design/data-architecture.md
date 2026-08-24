@@ -1,5 +1,9 @@
 # Data Architecture
 
+Conforms to the coverage contract in [`service-catalogue.md`](service-catalogue.md) —
+which services dshpy ports, which plugkit already ships, and which stay
+consumer-domain. This doc covers the storage tier's lifecycle only.
+
 The horizontal contract every state-touching spec anchors to. This document is
 canonical; a sprint's `design.md` cites it and never re-states it.
 
@@ -11,8 +15,8 @@ model calls live there, composed as plugins above this layer). dsh builds the
 
 | Tier | Owns | Lives in |
 |---|---|---|
-| **Storage** | the durable session log on disk (SQLite) | `src/dshpypypy/session/` |
-| **Computation** | the in-memory ordered surface (`derive_messages`), projection, invariant checks | `src/dshpypypy/session/` |
+| **Storage** | the durable session log on disk (SQLite) | `src/dshpy/session/` |
+| **Computation** | the in-memory ordered surface (`derive_messages`), projection, invariant checks | `src/dshpy/session/` |
 | **Business** | the agent loop, tools, prompt assembly, model calls | *not this repo* |
 
 Boundary contract: **storage ↔ computation is the append-only event log.** The

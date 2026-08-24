@@ -9,7 +9,7 @@ features: [session-log, session-persistence]
 supersedes: []
 superseded_by: null
 depends_on: []
-anchors: [data-architecture]
+anchors: [data-architecture, service-catalogue]
 ---
 
 # Session log with SQLite persistence
