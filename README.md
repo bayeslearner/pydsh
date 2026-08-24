@@ -20,7 +20,7 @@ the general seams.
 pydsh installs from git; it pulls the pinned `plugkit` kernel with it.
 
 ```bash
-uv add "pydsh @ git+https://github.com/bayeslearner/pydsh@v0.2.1"
+uv add "pydsh @ git+https://github.com/bayeslearner/pydsh@v0.2.2"
 ```
 
 ```python

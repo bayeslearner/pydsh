@@ -64,7 +64,22 @@ from .session import (
     SqliteSessionPersistence,
 )
 
-__version__ = "0.2.0"
+
+def _resolve_version() -> str:
+    """Read the version from installed metadata — pyproject.toml owns it.
+
+    Hardcoding it here forks the fact: the two copies drift the first time one
+    is bumped alone, which is exactly what happened between 0.2.0 and 0.2.1.
+    """
+    try:
+        from importlib.metadata import version
+
+        return version("pydsh")
+    except Exception:  # noqa: BLE001 - running from a source tree, uninstalled
+        return "0.0.0+unknown"
+
+
+__version__ = _resolve_version()
 
 __all__ = [
     "__version__",
