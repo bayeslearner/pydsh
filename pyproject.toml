@@ -1,21 +1,33 @@
 [project]
 name = "pydsh"
-version = "0.1.0"
+version = "0.2.0"
 description = "A Python port of the DeepSeek Harness service layer, built on the plugkit kernel."
 authors = [{ name = "Kun Deng", email = "bayeslearner@gmail.com" }]
 requires-python = ">=3.13"
-dependencies = ["plugkit"]
+# A direct git reference, not a bare name: plugkit is not on PyPI, so a
+# consumer installing pydsh must be told where the kernel comes from or
+# resolution fails. [tool.uv.sources] below overrides this for local
+# development only -- it does not reach consumers.
+dependencies = [
+    "plugkit @ git+https://github.com/bayeslearner/plugkit@v0.1.0",
+]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+# The plugkit dependency is a direct git reference (it is not on PyPI),
+# which hatchling refuses to build unless told to allow it.
+[tool.hatch.metadata]
+allow-direct-references = true
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/pydsh"]
 
-# The kernel is a local checkout until it gets a tagged release.
-# ponytail: hardcoded path to the kernel; switch to a version pin once
-# bayeslearner/plugkit publishes.
+# Local development only: work against the kernel checkout next door so a
+# kernel change is picked up without a push-tag-bump cycle. Consumers
+# resolve the pinned git reference in [project.dependencies] instead.
+# ponytail: when plugkit publishes to PyPI, both sides become a version pin.
 [tool.uv.sources]
 plugkit = { path = "../bayeslearner-microkernel" }
 

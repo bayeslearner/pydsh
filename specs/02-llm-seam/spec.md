@@ -1,7 +1,7 @@
 ---
 spec_id: 02-llm-seam
-status: ACTIVE
-closed_as: null
+status: CLOSED
+closed_as: SHIPPED
 since: 2026-08-24
 until: null
 epic: llm
@@ -581,13 +581,22 @@ returns a verdict rather than a raw echo of the offending value.
     - **Depends**: 3.3
     - **Requirements**: 6.1–6.3
 
-- [ ] 5. Wrap
-  - [ ] 5.1 Export surface + README "what works today"
+- [x] 5. Wrap
+  - [x] 5.1 Export surface + README "what works today"
     - **Depends**: 4.6
-  - [ ] 5.2 Close spec — all gates green, mark CLOSED
+  - [x] 5.2 Close spec — all gates green, mark CLOSED
     - **Depends**: 5.1
 
 ## Log
 
 **[2026-08-24]** — Created and activated. Frame ratified by the owner; sprint is
 step 1 of the catalogue-parity sequence.
+
+**[2026-08-24]** — CLOSED / SHIPPED. All 30 tasks done, 130 tests green
+(`uv run pytest tests -q`). Three defects found while porting and fixed,
+each recorded in Decisions or in the task that adopted it: retry replaying
+already-emitted chunks (I5), an empty provider/model erasing a route's
+default (I2), and plugkit's uncontained `emit` breaking a committed append.
+Verified as a consumer would use it: clean venv, `uv pip install` with no
+path override, kernel resolved from `plugkit@v0.1.0`, then a real
+mount -> stream -> persist -> reload -> measure run.
