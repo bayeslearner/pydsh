@@ -1,13 +1,19 @@
 [project]
 name = "pydsh"
-version = "0.2.0"
+version = "0.2.1"
 description = "A Python port of the DeepSeek Harness service layer, built on the plugkit kernel."
 authors = [{ name = "Kun Deng", email = "bayeslearner@gmail.com" }]
 requires-python = ">=3.13"
 # A direct git reference, not a bare name: plugkit is not on PyPI, so a
 # consumer installing pydsh must be told where the kernel comes from or
-# resolution fails. [tool.uv.sources] below overrides this for local
-# development only -- it does not reach consumers.
+# resolution fails.
+#
+# Deliberately NO [tool.uv.sources] override here. uv reads this file out of
+# the git checkout when a consumer installs pydsh from a tag, so a relative
+# path source ("../bayeslearner-microkernel") is resolved as a SUBDIRECTORY of
+# this repo and the install fails outright. To work against a local kernel,
+# shadow the pinned copy in your venv instead:
+#     uv sync && uv pip install -e ../bayeslearner-microkernel
 dependencies = [
     "plugkit @ git+https://github.com/bayeslearner/plugkit@v0.1.0",
 ]
@@ -23,13 +29,6 @@ allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/pydsh"]
-
-# Local development only: work against the kernel checkout next door so a
-# kernel change is picked up without a push-tag-bump cycle. Consumers
-# resolve the pinned git reference in [project.dependencies] instead.
-# ponytail: when plugkit publishes to PyPI, both sides become a version pin.
-[tool.uv.sources]
-plugkit = { path = "../bayeslearner-microkernel" }
 
 [dependency-groups]
 dev = [

@@ -20,7 +20,7 @@ the general seams.
 pydsh installs from git; it pulls the pinned `plugkit` kernel with it.
 
 ```bash
-uv add "pydsh @ git+https://github.com/bayeslearner/pydsh@v0.2.0"
+uv add "pydsh @ git+https://github.com/bayeslearner/pydsh@v0.2.1"
 ```
 
 ```python
@@ -39,14 +39,21 @@ design (see the coverage contract).
 ## Developing on it
 
 ```bash
-uv sync              # resolves the kernel from ../bayeslearner-microkernel
+uv sync              # resolves the pinned kernel from git
 uv run pytest tests  # the suite
 ```
 
 - Python ≥ 3.13, managed with `uv` (never pip/poetry).
-- Local development uses the kernel checkout next door, so a kernel change is
-  picked up without a push-tag-bump cycle. Consumers get the pinned git
-  reference instead — `[tool.uv.sources]` never reaches them.
+- To work against a **local kernel checkout**, shadow the pinned copy in your
+  venv — do not add a `[tool.uv.sources]` path override:
+
+  ```bash
+  uv sync && uv pip install -e ../bayeslearner-microkernel
+  ```
+
+  uv reads `pyproject.toml` out of the git checkout when a consumer installs
+  from a tag, so a relative path source is resolved as a subdirectory of *this*
+  repo and the install fails. v0.2.0 shipped that way and was unusable.
 - `reference/` holds the upstreams this ports from (git-ignored; see
   `CLAUDE.md`).
 
