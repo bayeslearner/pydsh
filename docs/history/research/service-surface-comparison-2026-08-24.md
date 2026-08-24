@@ -14,7 +14,7 @@ backend is refactored onto this port.
 - Existing Python port to mine: `agentic-harness-eval/docs/history/clones/dsh-python`
   (havocio/dsh-python, MIT, 34.5k LOC, 98 non-test modules).
 - prismi3 backend (target adoption):
-  `~/Dropbox/Projects/work-prismi3-agent` `src/backend/`.
+  `~/Projects/work-prismi3-agent` `src/backend/`.
 
 ## Field survey: other Python ports
 
