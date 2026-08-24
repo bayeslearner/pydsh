@@ -53,3 +53,40 @@ a dependency of the agent loop and worth scoping into spec 02.
 
 No open questions blocking that work. The stub is: `specs/02-llm/`
 (requirements / design / tasks), anchored to `service-catalogue.md`.
+
+## Machine-move outcome — recovered 2026-08-24
+
+The move landed. Recording what actually broke, because it broke **quietly**:
+
+**Both repos arrived with no `.git`.** The working trees synced through
+Dropbox; the repository directories did not. `bayeslearner-dsh` and
+`bayeslearner-microkernel` were both plain directories of files — `git status`
+said `not a git repository`, and nothing else complained.
+
+Recovery, verified on this machine:
+
+```bash
+# from ~/Dropbox/Projects — the trees are intact, only .git is missing
+git clone git@github.com:bayeslearner/pydsh   /tmp/pydsh-remote
+git clone git@github.com:bayeslearner/plugkit /tmp/plugkit-remote
+diff -rq bayeslearner-dsh /tmp/pydsh-remote --exclude=.git    # confirm no local drift FIRST
+mv /tmp/pydsh-remote/.git   bayeslearner-dsh/.git
+mv /tmp/plugkit-remote/.git bayeslearner-microkernel/.git
+```
+
+The `diff` is the safety step, not a formality: it distinguishes "the tree is
+the remote" from "the tree has unpushed work the clone would silently mask".
+Here both trees matched their remotes exactly (pydsh at `b48b54d`, plugkit at
+`8d5ccbc`), so re-attaching `.git` was lossless and `git status` came back
+clean against `origin/main` in both.
+
+Then the gate, green:
+
+```
+uv sync                    # resolved the ../bayeslearner-microkernel path dep
+uv run pytest tests -q     # 18 passed
+```
+
+`ponytail:` the durable fix is not a better ignore rule — it is that **origin
+is the backup and Dropbox is not**. Push before any machine move; assume the
+next tree arrives without its history.
