@@ -17,6 +17,7 @@ import time
 from dataclasses import dataclass, field
 from typing import Any
 
+from ..dispatch import emit_contained
 from .events import EVENT_DATA_FIELDS, SESSION_FORMAT_VERSION, SURFACE_EVENTS
 
 
@@ -167,7 +168,9 @@ class Session:
         self._events.append(event)
         if event_type in SURFACE_EVENTS:
             self._surface_nodes.append(event.seq)
-        self.ctx.emit("session/event", self, event)
+        # Post-commit: the event is already in the log, so a throwing
+        # observer must not turn a committed append into an exception.
+        emit_contained(self.ctx, "session/event", self, event)
         return event
 
     def derive_event_message(self, event: SessionEvent) -> Any:

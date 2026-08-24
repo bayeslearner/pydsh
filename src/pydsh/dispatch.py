@@ -37,8 +37,20 @@ def emit_contained(ctx: Any, name: str, *args: Any) -> list[BaseException]:
     # when there is none. So we walk the hook list ourselves. This is the ONE
     # place that reaches into the kernel's internals; if plugkit grows a
     # contained mode, only this function body changes.
-    hooks = list(ctx.events._hooks.get(name) or [])
-    for hook in hooks:
+    events = getattr(ctx, "events", None)
+    registry = getattr(events, "_hooks", None) if events is not None else None
+    if registry is None:
+        # A context with no kernel event system (a test stub, or a Session
+        # built outside a store). There are no hook records to walk, so
+        # deliver through whatever emit it does have and contain that.
+        try:
+            ctx.emit(name, *args)
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("listener for %r failed: %s", name, exc, exc_info=exc)
+            return [exc]
+        return []
+
+    for hook in list(registry.get(name) or []):
         try:
             call_listener(hook["callback"], None, list(args))
         except Exception as exc:  # noqa: BLE001 - containment is the point

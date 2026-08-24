@@ -548,6 +548,14 @@ returns a verdict rather than a raw echo of the offending value.
   - [x] 3.3 `llm/token_meter.py` — `ctx.token_meter`
     - **Depends**: 1.1
     - **Requirements**: 6.1, 6.2, 6.3
+  - [x] 3.4 Contain observer failures on `session/event` (adopted defect)
+    - `docs/design/data-architecture.md` states the append feed's observer
+      failures are "logged and contained without failing the committed
+      append". plugkit's `emit` propagates instead, so a throwing observer
+      turns a committed append into an exception. Code is wrong, doc is
+      right — route it through `emit_contained`.
+    - **Depends**: 3.1
+    - **Requirements**: NF 1
 
 - [x] 4. Tests
   - [x] 4.1 `test_message.py` — vocabulary + round-trip property

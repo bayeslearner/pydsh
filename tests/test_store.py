@@ -127,3 +127,25 @@ async def test_version_mismatch_refuses(tmp_path):
     conn.close()
     with pytest.raises(SessionFormatUnsupportedError):
         await backend.load("v1")
+
+
+async def test_failing_observer_cannot_break_a_committed_append():
+    """The append feed is post-commit — a throwing observer must not undo it.
+
+    `docs/design/data-architecture.md` states observer failures on
+    `session/event` are logged and contained. plugkit's `emit` propagates, so
+    this is the guard that keeps code and the anchor doc agreeing.
+    """
+    root = Context()
+    await root.plugin(SessionStore)
+    session = root.sessions.create("s")
+
+    seen = []
+    root.on("session/event", lambda s, e: (_ for _ in ()).throw(RuntimeError("boom")))
+    root.on("session/event", lambda s, e: seen.append(e.seq))
+
+    event = session.append("turn/start", {"turn": 1})
+
+    assert event.seq == 1
+    assert session.events[0] is event
+    assert seen == [1]  # the later observer still ran
