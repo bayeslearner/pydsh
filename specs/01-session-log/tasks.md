@@ -77,15 +77,15 @@
     - **Depends**: 3.1, 3.2
     - **Requirements**: 3.1, 3.2, 3.3, 3.4, NF 2
 
-- [ ] 5. Wrap
-  - [ ] 5.1 Root README + docs index
+- [x] 5. Wrap
+  - [x] 5.1 Root README + docs index
     - What the port is, setup (`uv sync`), run tests, where each kind of truth
       lives; CLAUDE.md with `specs_root: specs` and setup pointers.
     - **Depends**: 1.1
     - **Requirements**: —
-  - [ ] 5.2 Close spec — verify all gates, mark CLOSED
-    - All tests green; review the Q1–Q7 bar over the diff; set `status:
-      CLOSED`, `closed_as: SHIPPED`.
+  - [x] 5.2 Close spec — verify all gates, mark CLOSED
+    - All tests green (18 passed); Q1–Q7 review over the diff clean; set
+      `status: CLOSED`, `closed_as: SHIPPED`.
     - **Depends**: 4.1, 4.2, 4.3, 4.4, 5.1
     - **Requirements**: all
 

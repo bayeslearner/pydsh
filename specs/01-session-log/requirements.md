@@ -1,7 +1,7 @@
 ---
 spec_id: 01-session-log
-status: ACTIVE
-closed_as: null
+status: CLOSED
+closed_as: SHIPPED
 since: 2026-08-24
 until: null
 epic: core
