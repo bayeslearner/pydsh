@@ -1,0 +1,31 @@
+[project]
+name = "pydsh"
+version = "0.1.0"
+description = "A Python port of the DeepSeek Harness service layer, built on the plugkit kernel."
+authors = [{ name = "Kun Deng", email = "bayeslearner@gmail.com" }]
+requires-python = ">=3.13"
+dependencies = ["plugkit"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pydsh"]
+
+# The kernel is a local checkout until it gets a tagged release.
+# ponytail: hardcoded path to the kernel; switch to a version pin once
+# bayeslearner/plugkit publishes.
+[tool.uv.sources]
+plugkit = { path = "../bayeslearner-microkernel" }
+
+[dependency-groups]
+dev = [
+    "pytest>=9",
+    "pytest-asyncio>=1.4",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"

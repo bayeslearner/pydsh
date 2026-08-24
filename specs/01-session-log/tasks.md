@@ -9,70 +9,71 @@
 
 ## Tasks
 
-- [ ] 1. Foundation
-  - [ ] 1.1 Scaffold package and tooling
+- [x] 1. Foundation
+  - [x] 1.1 Scaffold package and tooling
     - `pyproject.toml` (project `pydsh`, package at `src/pydsh`, path dep on the
       local plugkit kernel), `uv.lock` via `uv sync`, `src/pydsh/` layout,
       `.gitignore`.
     - **Depends**: —
     - **Requirements**: —
-  - [ ] 1.2 `events.py` vocabulary
+  - [x] 1.2 `events.py` vocabulary
     - `SESSION_FORMAT_VERSION`, `SURFACE_EVENTS`, `TURN_EVENTS`,
       `STEP_EVENTS`, and the documented payload field specs for the core
       event types.
     - **Depends**: 1.1
     - **Requirements**: 4.1, 4.2, 4.3
 
-- [ ] 2. Core
-  - [ ] 2.1 `Session` — append-only log
+- [x] 2. Core
+  - [x] 2.1 `Session` — append-only log
     - `SessionEvent` (frozen dataclass), `SessionHeader`, `Session.seq`,
       immutable `events` view, `append()` with contiguous seq + surface
       bookkeeping.
     - **Depends**: 1.2
     - **Requirements**: 1.1, 1.2, 1.3, 1.5
-  - [ ] 2.2 `Session.derive_messages()` — surface projection
+  - [x] 2.2 `Session.derive_messages()` — surface projection
     - Project surface events to model-visible messages; drop malformed ones
       without crashing.
     - **Depends**: 2.1
     - **Requirements**: 1.4
-  - [ ] 2.3 Lossless-JSON validation at the append boundary
+  - [x] 2.3 Lossless-JSON validation at the append boundary
     - Reject cycles / `NaN` / unsupported scalars before any memory write.
     - **Depends**: 2.1
     - **Requirements**: 1.3, NF 1, NF 2
-  - [ ] 2.4 `SessionStore` Service — `ctx.sessions`
+  - [x] 2.4 `SessionStore` Service — `ctx.sessions`
     - Kernel `Service` with `provide="sessions"`; `create/get/list`;
       `session/event` lifecycle broadcast; fiber-bound disposal.
     - **Depends**: 2.1
     - **Requirements**: 2.1, 2.2, 2.3, 2.4
 
-- [ ] 3. Persistence
-  - [ ] 3.1 Persistence seam + SQLite backend
+- [x] 3. Persistence
+  - [x] 3.1 Persistence seam + SQLite backend
     - `SessionPersistence` ABC (`create/append/load/list`); async-stepped
       `sqlite3` WAL backend; schema per the data-architecture anchor.
     - **Depends**: 2.1
     - **Requirements**: 3.1, 3.2, 3.4
-  - [ ] 3.2 Version guard + error handling
+  - [x] 3.2 Version guard + error handling
     - Refuse to load a session whose version differs; `SessionPersistenceError`
       / `SessionFormatUnsupportedError`.
     - **Depends**: 3.1
     - **Requirements**: 3.3, NF 1
 
-- [ ] 4. Tests
-  - [ ] 4.1 Test session log invariants
+- [x] 4. Tests
+  - [x] 4.1 Test session log invariants
     - Contiguous seq, immutability, surface membership, derive projection.
     - **Depends**: 2.1, 2.2
     - **Requirements**: 1.1, 1.2, 1.4, 1.5
-  - [ ] 4.2 Test lossless JSON rejection
+  - [x] 4.2 Test lossless JSON rejection
     - Cycle / NaN / unsupported scalar → rejected, no partial append.
     - **Depends**: 2.3
     - **Requirements**: 1.3
-  - [ ] 4.3 Test store lifecycle
+  - [x] 4.3 Test store lifecycle
     - `create/get/list`; `session/event` broadcast; fiber-bound disposal.
     - **Depends**: 2.4
     - **Requirements**: 2.1, 2.2, 2.3, 2.4
-  - [ ] 4.4 Test persistence round-trip — the MVP proof
+  - [x] 4.4 Test persistence round-trip — the MVP proof
     - create → append → flush → close → `load` → `derive_messages` on a real
-      `tmp_path` SQLite file; plus missing-session and version-mismatch.
+      `tmp_path` SQLite file; plus a separate-process restart proof
+      (`test_restart.py`), missing-session and version-mismatch.
     - **Depends**: 3.1, 3.2
     - **Requirements**: 3.1, 3.2, 3.3, 3.4, NF 2
 
