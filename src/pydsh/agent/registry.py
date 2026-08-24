@@ -40,6 +40,17 @@ class AgentRegistry(Service):
         """Register the loop implementation. The most recent one wins."""
         self._factory = factory
 
+    def clear_factory(self, factory: Any) -> None:
+        """Withdraw a factory on unmount, if it is still the registered one.
+
+        Guarded by identity so a loop unloading *after* another has taken over
+        does not withdraw its successor's registration — the same reason
+        plugkit's points read the newest registration rather than restoring a
+        saved value.
+        """
+        if self._factory is factory:
+            self._factory = None
+
     def has_factory(self) -> bool:
         """Whether any loop is mounted."""
         return self._factory is not None
@@ -60,26 +71,37 @@ class AgentLoop(Service):
     """``ctx.agent_loop`` — the default loop, and the registry's factory."""
 
     provide = "agent_loop"
-    inject = ["agents"]
+    #: What the loop cannot run without. plugkit gates activation on these, so
+    #: mounting the loop before the registry (or without an LLM seam) leaves it
+    #: PENDING rather than half-working. ``tools`` is deliberately absent: it is
+    #: optional, and `inject` has no optional form — see the note in
+    #: :class:`~pydsh.agent.agent.Agent`.
+    inject = ["agents", "sessions", "llm"]
 
     def __init__(self, ctx: Any, config: Any = None) -> None:
         super().__init__(ctx)
-        if not hasattr(ctx, "agents"):
-            raise RuntimeError(
-                "the agents registry is not mounted: mount "
-                "pydsh.agent.AgentRegistry before pydsh.agent.AgentLoop"
-            )
+        # Held rather than read back through `ctx.agents` at teardown time: an
+        # unloading fiber cannot resolve its injected services, so reaching for
+        # the registry during disposal is exactly when it is unavailable.
+        self._registry = ctx.agents
         self._agents: dict[str, Agent] = {}
         # Aborted when this plugin is unloaded. Every agent created here fuses
         # it into its lifetime, so unmounting the loop ends them rather than
         # leaving them running against a context that no longer has one.
         self._teardown = CancelSignal()
         ctx.effect(lambda: self._shutdown)
-        ctx.agents.set_factory(self)
+        self._registry.set_factory(self)
 
     def _shutdown(self) -> None:
-        """Unmount: end every agent this loop created."""
+        """Unmount: withdraw the factory and end every agent this loop created.
+
+        Withdrawing matters as much as ending the agents. A registry still
+        pointing at an unloaded loop would keep handing out agents built by it
+        — working objects on a torn-down plugin, which is worse than the clear
+        "no agent factory is registered" a caller gets instead.
+        """
         self._teardown.abort("the agent loop was unmounted")
+        self._registry.clear_factory(self)
         for agent in list(self._agents.values()):
             agent.dispose()
         self._agents.clear()

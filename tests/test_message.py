@@ -166,3 +166,48 @@ def test_encoded_message_reaches_the_session_log():
     )
     derived = session.derive_messages()
     assert decode_payload(derived[0]) == message
+
+
+# --------------------------------------------------------------------------- #
+# Encoding a dataclass the vocabulary does not know (spec 03, Requirement 8)
+# --------------------------------------------------------------------------- #
+def test_a_nested_block_keeps_its_tag_through_an_unknown_dataclass():
+    """R8.1 — the defect: `asdict` recursed into nested dataclasses itself.
+
+    A StreamChunk carrying a TextBlock reached the log as a bare
+    ``{"text": ...}`` with the vocabulary tag gone, so the decode could not
+    restore the block — which is exactly the token-level replay fidelity the
+    `assistant/chunk` event exists to provide.
+    """
+    from pydsh.llm import ChunkType, StreamChunk
+
+    chunk = StreamChunk(
+        type=ChunkType.BLOCK_END, index=0, block=TextBlock("assembled")
+    )
+    encoded = encode_payload(chunk)
+    assert encoded["block"] == {"__block__": "text", "text": "assembled"}
+
+
+def test_a_stream_chunk_round_trips_with_its_block_intact():
+    """R8.2 — the replayed chunk holds the same block the live one did."""
+    from pydsh.llm import ChunkType, StreamChunk
+
+    chunk = StreamChunk(
+        type=ChunkType.BLOCK_END, index=1, block=ToolCallBlock(
+            id="c1", name="read", arguments='{"path": "a"}'
+        )
+    )
+    restored = decode_payload(encode_payload(chunk))
+    assert restored["block"] == ToolCallBlock(
+        id="c1", name="read", arguments='{"path": "a"}'
+    )
+    assert restored["type"] == "block-end"
+
+
+def test_an_encoded_chunk_is_accepted_by_the_session_log():
+    """The str-Enum tag and every field must satisfy the lossless validator."""
+    from pydsh.llm import ChunkType, StreamChunk
+    from pydsh.session.session import _validate_lossless_json
+
+    chunk = StreamChunk(type=ChunkType.TEXT_DELTA, index=0, text="hi")
+    _validate_lossless_json(encode_payload({"turn": 1, "step": 1, "chunk": chunk}))

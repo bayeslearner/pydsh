@@ -869,7 +869,7 @@ log tool arguments anywhere but the session log the consumer already owns.
     - **Depends**: —
     - **Requirements**: 7.1, 7.2
 
-- [ ] 2. Core
+- [x] 2. Core
   - [x] 2.1 `agent/inbox.py` — the two queues, splice events, `replay`
     - **Depends**: 1.2
     - **Requirements**: 2.1–2.7
@@ -894,7 +894,7 @@ log tool arguments anywhere but the session log the consumer already owns.
   - [x] 2.6 Export surface — `pydsh.agent` and the package `__init__`
     - **Depends**: 2.5
 
-- [ ] 3. Tests
+- [x] 3. Tests
   - [x] 3.1 `test_cancel.py` — abort/idempotence/listener containment/fusion/dispose
     - **Depends**: 1.1
     - **Requirements**: 1.1–1.7
@@ -902,7 +902,7 @@ log tool arguments anywhere but the session log the consumer already owns.
     - **Depends**: 2.1
     - **Requirements**: 2.1–2.7
     - **Properties**: 3
-  - [ ] 3.3 `test_assembler.py` — deltas, block-end, finish flush, no-finish flush
+  - [x] 3.3 `test_assembler.py` — deltas, block-end, finish flush, no-finish flush
     - **Depends**: 2.2
     - **Requirements**: 4.1–4.6
   - [x] 3.4 `test_agent_loop.py` — the loop on a real kernel with a fake adapter
@@ -916,14 +916,14 @@ log tool arguments anywhere but the session log the consumer already owns.
     - **Depends**: 2.4
     - **Requirements**: 5.1–5.7
     - **Properties**: 2
-  - [ ] 3.6 `test_agent_registry.py` — no factory, swap factory, resume source,
+  - [x] 3.6 `test_agent_registry.py` — no factory, swap factory, resume source,
         unmount aborts the loop's agents
     - **Depends**: 2.5
     - **Requirements**: 6.1–6.7
-  - [ ] 3.7 `test_header_request.py` — call config through SQLite and back
+  - [x] 3.7 `test_header_request.py` — call config through SQLite and back
     - **Depends**: 2.3, 1.4
     - **Requirements**: 7.1–7.3
-  - [ ] 3.8 Extend `test_message.py` — a chunk's nested block survives encoding
+  - [x] 3.8 Extend `test_message.py` — a chunk's nested block survives encoding
     - **Depends**: 1.3
     - **Requirements**: 8.1, 8.2
 

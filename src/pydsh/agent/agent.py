@@ -100,6 +100,16 @@ class Agent:
         signal: Optional[CancelSignal] = None,
     ) -> None:
         self.ctx = ctx
+        # Tools are optional, and plugkit's `inject` cannot express that: it is
+        # the requirement list *and* the permission list, so a plugin context
+        # that did not inject `tools` cannot read it even when it is mounted —
+        # the loop would silently behave as if no tool existed. Declaring it
+        # instead would leave the whole loop PENDING (silently absent) for a
+        # consumer who mounts no tools. So the optional capability is resolved
+        # from the root context, where no permission list applies.
+        # ponytail: collapses to plain `ctx.tools` if plugkit grows an optional
+        # inject; this is the only place that reaches for the root.
+        self._root = getattr(ctx, "root", ctx)
         self.session = session
         # An agent is bound 1:1 to a session, so it takes the session's id
         # rather than minting a second identity that could disagree.
@@ -359,9 +369,13 @@ class Agent:
             session_id=self.id,
         )
 
+    def _tools(self) -> Any:
+        """The tools service, or ``None`` when none is mounted."""
+        return getattr(self._root, "tools", None)
+
     def _tool_schemas(self) -> Optional[list[dict]]:
         """The registered tools as the model sees them, or None if none are."""
-        tools = getattr(self.ctx, "tools", None)
+        tools = self._tools()
         if tools is None:
             return None
         schemas = [
@@ -468,7 +482,7 @@ class Agent:
         if parse_error is not None:
             return _ToolOutcome(parse_error, True)
 
-        tools = getattr(self.ctx, "tools", None)
+        tools = self._tools()
         if tools is None:
             return _ToolOutcome(
                 f"no tools are available, so {call.name!r} cannot be called", True
