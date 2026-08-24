@@ -196,7 +196,7 @@ is measured the same way everywhere.
 ## Out of Scope
 
 - Provider adapters (`openai_compatible`, `deepseek`, `pi_ai`) — sprint 11.
-- The agent loop and `system_prompt` — sprint 04.
+- The agent loop — spec 03; `system_prompt` — a later sprint.
 - Compaction's use of the token meter — sprint 09.
 - Session-header persistence of call config — the encoding ships here; the
   session-header write path lands with the agent loop that owns the epoch.
