@@ -6,22 +6,38 @@ name on its context:
 - ``ctx.sessions`` — the append-only session log and its SQLite persistence.
 - ``ctx.llm`` — the adapter registry and the interceptable model stream.
 - ``ctx.token_meter`` — one estimator for conversation pressure.
+- ``ctx.agents`` / ``ctx.agent_loop`` — the turn/step loop that drives a
+  conversation, held behind a registry so it can be replaced.
 
 Mount them onto a root context and they are available everywhere below it::
 
     from plugkit import Context
-    from pydsh import LlmService, SessionStore, TokenMeter
+    from pydsh import AgentLoop, AgentRegistry, LlmService, SessionStore, TokenMeter
 
     root = Context()
     await root.plugin(SessionStore)
     await root.plugin(LlmService)
     await root.plugin(TokenMeter)
+    await root.plugin(AgentRegistry)
+    await root.plugin(AgentLoop)
+
+The loop reaches tools through plugkit's ``ctx.tools`` when it is mounted, and
+offers the model none when it is not.
 
 The shared conversation vocabulary lives in :mod:`pydsh.message` and is what
 every seam speaks. Provider adapters are plugins mounted above this layer, not
 part of it — nothing here opens a socket.
 """
 
+from .agent import (
+    Agent,
+    AgentLoop,
+    AgentOptions,
+    AgentRegistry,
+    BlockAssembler,
+    Inbox,
+)
+from .cancel import CancelledError, CancelSignal
 from .dispatch import emit_contained
 from .llm import (
     AdapterRegistration,
@@ -106,6 +122,16 @@ __all__ = [
     "resolve_retry_policy",
     "AppIdentity",
     "attribution_headers",
+    # agent seam
+    "AgentRegistry",
+    "AgentLoop",
+    "Agent",
+    "AgentOptions",
+    "Inbox",
+    "BlockAssembler",
+    # cancellation
+    "CancelSignal",
+    "CancelledError",
     # metering
     "TokenMeter",
     # vocabulary

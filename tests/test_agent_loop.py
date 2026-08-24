@@ -384,3 +384,27 @@ async def test_dispose_ends_the_agent_for_good():
     agent.dispose()
     await agent.run("go")
     assert "turn/start" not in types(agent)
+
+
+async def test_a_background_drain_failure_is_logged_not_lost(caplog):
+    """insert() is fire-and-forget, so a failure has nobody to raise to.
+
+    Without this it would surface only as asyncio's "exception was never
+    retrieved" warning at collection time, which is not where anyone looks.
+    """
+
+    class Exploding(LlmAdapter):
+        async def stream(self, options):
+            raise RuntimeError("background boom")
+            yield  # pragma: no cover
+
+        def provider_info(self, provider):
+            return LlmProviderInfo(id=provider, name=provider)
+
+    root, agent = await build(Exploding())
+    with caplog.at_level("ERROR", logger="pydsh.agent"):
+        agent.insert(create_user_message([TextBlock("go")], MessageSource("user")))
+        with pytest.raises(RuntimeError, match="background boom"):
+            await agent.when_idle()
+
+    assert any("drain failed" in r.message for r in caplog.records)

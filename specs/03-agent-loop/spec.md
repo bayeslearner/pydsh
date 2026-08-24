@@ -1,7 +1,7 @@
 ---
 spec_id: 03-agent-loop
-status: ACTIVE
-closed_as: null
+status: CLOSED
+closed_as: SHIPPED
 since: 2026-08-24
 until: null
 epic: agent
@@ -927,10 +927,10 @@ log tool arguments anywhere but the session log the consumer already owns.
     - **Depends**: 1.3
     - **Requirements**: 8.1, 8.2
 
-- [ ] 4. Wrap
-  - [ ] 4.1 README "what works today" + the mount order for the agent seam
+- [x] 4. Wrap
+  - [x] 4.1 README "what works today" + the mount order for the agent seam
     - **Depends**: 3.8
-  - [ ] 4.2 Close the sprint — full suite green, frontmatter to CLOSED
+  - [x] 4.2 Close the sprint — full suite green, frontmatter to CLOSED
     - **Depends**: 4.1
 
 ## Log
@@ -939,3 +939,33 @@ log tool arguments anywhere but the session log the consumer already owns.
 `system_prompt` and `plan_mode` deferred. Frame taken from
 `reference/dsh-python/dsh_py/services/agent.py` + `inbox.py` read in full, and
 from plugkit's `ToolsService` (five-stage pipeline, `execute` never raises).
+
+**[2026-08-24]** — CLOSED / SHIPPED. All tasks done, 226 tests green
+(`uv run pytest tests -q`), up from 130 at the start of the sprint.
+
+Verified as a consumer would: the README's mount sequence run end to end on a
+real context — session store, LLM seam, token meter, plugkit's points + tools,
+registry, loop — with a tool registered. The loop offered the tool to the
+model, wrote the full ten-event story of the turn, and the token meter from
+spec 02 measured the loop's encoded messages correctly (non-zero on both
+surface nodes), which is the cross-seam check that mattered.
+
+Nine defects found while porting, each fixed rather than reproduced. Six are
+deviations from the Python reference, recorded in Decisions: the single
+cancellation signal that permanently disabled a cancelled agent; `run`
+returning before the work it delivered was done; a step budget reported as
+`max-tokens`; a turn that raised being logged as `completed`; a cancel ignored
+by an adapter reported as a clean completion; and tool arguments left for each
+tool to parse. Three are pydsh's own, found by the tests: `inject` being both
+requirement and permission list, so optional `tools` was unreachable from the
+loop's context; an unmounted loop left registered as the registry's factory;
+and an incremental flush dropping a header change with no event after it.
+
+Two items carried in from earlier sprints landed: spec 02's deferred
+session-header call-config write path (R7), and the `asdict` encode that
+dropped vocabulary tags nested inside a `StreamChunk` (R8).
+
+One requirement grew during the sprint: R6.6 assumed `ctx.sessions.resume`
+existed. It did not — spec 01's restart proof loaded through the backend
+directly — so `SessionStore.resume` was added here, because the loop must
+reach persistence through the seam rather than past it.

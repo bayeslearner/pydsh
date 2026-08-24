@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 from dataclasses import dataclass
 from typing import Any, Optional
 
@@ -47,6 +48,8 @@ from ..message import (
 )
 from .assembler import BlockAssembler
 from .inbox import NEXT_TURN, Inbox
+
+logger = logging.getLogger("pydsh.agent")
 
 #: How many steps one turn may take before the loop gives up. A step is a model
 #: call, so this is the ceiling on runaway tool cycles.
@@ -202,7 +205,20 @@ class Agent:
             activity = CancelSignal.any([self._lifetime])
             self._activity = activity
             self._draining = asyncio.ensure_future(self._drain(activity))
+            # `insert` is fire-and-forget, so nobody may ever await this task.
+            # An unretrieved failure would surface only as asyncio's "exception
+            # was never retrieved" warning at garbage-collection time, which is
+            # not where anyone looks. `run` still re-raises for its caller.
+            self._draining.add_done_callback(self._log_if_failed)
         return self._draining
+
+    def _log_if_failed(self, task: "asyncio.Future") -> None:
+        """Surface a background drain's failure rather than losing it."""
+        if task.cancelled():
+            return
+        error = task.exception()
+        if error is not None:
+            logger.error("agent %s: drain failed: %s", self.id, error, exc_info=error)
 
     async def _drain(self, activity: CancelSignal) -> None:
         """Process the inbox until it is empty or the activity is cancelled."""

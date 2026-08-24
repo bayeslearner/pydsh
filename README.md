@@ -24,14 +24,27 @@ uv add "pydsh @ git+https://github.com/bayeslearner/pydsh@v0.2.2"
 ```
 
 ```python
-from plugkit import Context
-from pydsh import LlmService, SessionStore, TokenMeter
+from plugkit import Context, PointsService, ToolsService
+from pydsh import AgentLoop, AgentOptions, AgentRegistry, LlmService, SessionStore, TokenMeter
 
 root = Context()
 await root.plugin(SessionStore)   # ctx.sessions
 await root.plugin(LlmService)     # ctx.llm
 await root.plugin(TokenMeter)     # ctx.token_meter
+await root.plugin(PointsService)  # ctx.points  — plugkit
+await root.plugin(ToolsService)   # ctx.tools   — plugkit, optional
+await root.plugin(AgentRegistry)  # ctx.agents
+await root.plugin(AgentLoop)      # ctx.agent_loop
+
+session = root.sessions.create()
+agent = root.agents.create_agent(session, AgentOptions(provider="acme", model="a-1"))
+await agent.run("what changed today?")
 ```
+
+Order matters only in that `AgentLoop` requires `agents`, `sessions` and `llm`:
+plugkit gates activation on those, so a loop mounted early stays pending until
+they arrive rather than coming up half-working. `ToolsService` is optional —
+without it the model is offered no tools.
 
 Mount a provider adapter of your own onto `ctx.llm` — pydsh ships none, by
 design (see the coverage contract).
@@ -79,10 +92,26 @@ uv run pytest tests  # the suite
   never replays chunks the caller already saw.
 - **Token metering** (`ctx.token_meter`): one estimator for conversation
   pressure, measured against the session surface.
+- **The agent loop** (`pydsh.agent`, `ctx.agents` / `ctx.agent_loop`): the
+  turn/step machine that drives a conversation — a model call per step, the
+  tool calls it asks for executed through plugkit's `ctx.tools` pipeline (so
+  guards and approvers apply without the loop knowing), results fed back, and
+  every decision written to the session log. Tool calls run bounded-parallel
+  but are always logged in the order the model asked, so a replay is
+  deterministic. Turns end with a stated reason — completed, blocked,
+  max-steps, max-tokens, cancelled, or failed — on every path including an
+  exception.
+- **Pending input that survives a restart** (`Inbox`): messages delivered but
+  not yet processed live in two queues whose every change is a session event,
+  so `Inbox.replay(session)` rebuilds them exactly.
+- **Cancellation** (`pydsh.cancel`): `AbortSignal` semantics, with two scopes
+  per agent. `cancel()` stops the work in flight and leaves the agent usable;
+  only a lifetime abort — the caller tearing down, or the loop being unmounted
+  — ends it.
 
 No provider adapter ships here — `openai_compatible`, `deepseek` and `pi_ai`
-are plugins in a later sprint. The agent loop, tools seam, and the wider
-service catalogue are queued in the order
+are plugins in a later sprint. `system_prompt` and `plan_mode` (the rest of the
+Agent seam) and the wider service catalogue are queued in the order
 [`docs/design/service-catalogue.md`](docs/design/service-catalogue.md) defines.
 
 ## Where each kind of truth lives
