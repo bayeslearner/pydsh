@@ -18,7 +18,7 @@ payload does not survive as a tuple.
 
 from __future__ import annotations
 
-from dataclasses import asdict, is_dataclass
+from dataclasses import fields, is_dataclass
 from typing import Any
 
 from .blocks import (
@@ -84,8 +84,14 @@ def _encode(value: Any) -> Any:
         return {str(k): _encode(v) for k, v in value.items()}
     if is_dataclass(value):
         # A plain dataclass the vocabulary doesn't know (e.g. StreamChunk):
-        # flatten to a dict, then encode whatever it holds.
-        return _encode(asdict(value))
+        # flatten to a dict, then encode whatever it holds. Field-by-field
+        # rather than `dataclasses.asdict`, because asdict recurses *itself*
+        # into nested dataclasses — a StreamChunk carrying a TextBlock would
+        # reach the log as a bare {"text": ...} with its tag gone, so the
+        # decode could not restore the block and `assistant/chunk` would not
+        # have the replay fidelity it exists for. Walking one level and
+        # recursing through _encode keeps every nested tag.
+        return {f.name: _encode(getattr(value, f.name)) for f in fields(value)}
     return value
 
 

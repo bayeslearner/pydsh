@@ -851,21 +851,21 @@ log tool arguments anywhere but the session log the consumer already owns.
 
 ## Tasks
 
-- [ ] 1. Foundation
-  - [ ] 1.1 `pydsh/cancel.py` — `CancelSignal`, `CancelledError`, disposable `any`
+- [x] 1. Foundation
+  - [x] 1.1 `pydsh/cancel.py` — `CancelSignal`, `CancelledError`, disposable `any`
     - **Depends**: —
     - **Requirements**: 1.1–1.7
-  - [ ] 1.2 Add `agent/inbox/spliced` to the session event vocabulary
+  - [x] 1.2 Add `agent/inbox/spliced` to the session event vocabulary
     - Log-only; data fields `target`, `start`, `inserted`, `removedCount`, `outcome`.
     - **Depends**: —
     - **Requirements**: 2.2, 2.3
-  - [ ] 1.3 Encode unknown dataclasses field-by-field instead of `asdict`
+  - [x] 1.3 Encode unknown dataclasses field-by-field instead of `asdict`
     - Fixes the lost vocabulary tag inside an encoded `StreamChunk`.
     - Also correct `events.py`'s claim that `append` validates data keys — it
       validates the type and lossless-JSON only.
     - **Depends**: —
     - **Requirements**: 8.1, 8.2
-  - [ ] 1.4 `SessionHeader.request` + `to_json`/`from_json` round-trip
+  - [x] 1.4 `SessionHeader.request` + `to_json`/`from_json` round-trip
     - **Depends**: —
     - **Requirements**: 7.1, 7.2
 

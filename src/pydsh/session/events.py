@@ -39,10 +39,18 @@ EVENT_TYPES = (
     "tool/call",
     # tool/result — a completed tool call's model-facing result
     "tool/result",
+    # agent/inbox/spliced — one change to the agent's pending-input queues.
+    # Log-only, and the reason the inbox survives a restart: the queues are a
+    # projection of these events, never state that lives only in memory.
+    "agent/inbox/spliced",
 )
 
-# The payload shape of each event type, as the type key -> field names. Kept
-# as documentation plus a cheap guard: `session.append` validates the keys.
+# The payload shape of each event type, as the type key -> field names.
+# Documentation, not a guard: `session.append` validates that the event type is
+# known and that the data is lossless-JSON, and does not inspect these keys.
+# Several payloads carry a field only in some cases (a splice records
+# `removedCount` only when it removed something), so a key check here would
+# reject valid events.
 EVENT_DATA_FIELDS: dict[str, tuple[str, ...]] = {
     "turn/start": ("turn",),
     "turn/end": ("turn", "reason"),
@@ -53,4 +61,5 @@ EVENT_DATA_FIELDS: dict[str, tuple[str, ...]] = {
     "assistant/message": ("turn", "step", "message", "usage"),
     "tool/call": ("turn", "step", "callId", "name", "arguments"),
     "tool/result": ("turn", "step", "message", "error", "meta"),
+    "agent/inbox/spliced": ("target", "start", "inserted", "removedCount", "outcome"),
 }

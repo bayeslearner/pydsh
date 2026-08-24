@@ -58,6 +58,12 @@ class SessionHeader:
     id: str = ""
     created_at: float = 0.0
     cwd: str | None = None
+    #: The call config the most recent step used, as a plain dict — the
+    #: conversation's current route, not part of its content. Written by the
+    #: agent loop that owns the epoch and read back on resume, so continuing a
+    #: session does not silently change provider or model. ``None`` until a
+    #: step has run.
+    request: dict | None = None
 
 
 def _validate_lossless_json(value: Any) -> None:
@@ -201,6 +207,7 @@ class Session:
                 "id": self.header.id,
                 "created_at": self.header.created_at,
                 "cwd": self.header.cwd,
+                "request": self.header.request,
             },
             "events": [
                 {
