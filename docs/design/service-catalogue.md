@@ -1,6 +1,6 @@
 # Service Catalogue — the port's coverage contract
 
-Canonical answer to "what does dshpy port?". The port covers **100% of the
+Canonical answer to "what does pydsh port?". The port covers **100% of the
 dsh-python service surface** (and the reference seam it mirrors), except where
 a piece is already provided by plugkit, or is a domain/consumer-specific layer
 that does not belong in a general core.
@@ -9,15 +9,24 @@ This document is the single source of truth for coverage. Every spec that
 ports a service anchors here. Reference direction: this design doc is pointed
 *at* by specs; it points only at steering, never back at a spec id.
 
+The dsh-python README §6 "复刻进度 (replication progress)" is the upstream
+author's own coverage map: Layer 0 kernel / Layer 2 three seams (Session,
+Agent, LLM) / Layer 3 support services / Layer 4 app layer / extra adapters,
+all ✅. This catalogue is that map, re-generated against pydsh's kernel choice:
+Layer 0 (fiber/scope/schema/loader/hmr) is **plugkit-shipped**, every seam
+and support service is **core**, Layer 4 is **app-layer**, the provider
+adapters are **provider-domain**, and prismi3-shaped concepts are
+**consumer-domain**.
+
 ## Coverage classes
 
 | Class | Meaning |
 |---|---|
-| **plugkit-shipped** | the kernel already provides it; dshpy reuses, does not re-port |
-| **core** | ported into dshpy as a general seam/service |
+| **plugkit-shipped** | the kernel already provides it; pydsh reuses, does not re-port |
+| **core** | ported into pydsh as a general seam/service |
 | **app-layer** | harness-user-facing entry (CLI / gateway / SDK / config files) — ported, but thin shells over core; not core itself |
 | **provider-domain** | a provider-specific or single-domain implementation — ported as a *plugin*, swap via config, not core |
-| **consumer-domain** | belongs above dshpy entirely (a consumer's own plugins); at most an integration example |
+| **consumer-domain** | belongs above pydsh entirely (a consumer's own plugins); at most an integration example |
 
 ## Coverage by dsh-python seam
 
@@ -134,7 +143,7 @@ excluding them is the point, not a gap:
   (`message`, `brand`, session/agent/llm event vocabularies).
 - **Provider-specific = plugin, swap via config** (`deepseek`, `pi_ai`, `openai_compatible`,
   `*_local` backends, the `*‑tool` plugins).
-- **Consumer-specific = above dshpy entirely.** Consumers replace a plugin/service by
+- **Consumer-specific = above pydsh entirely.** Consumers replace a plugin/service by
   mounting another, per the reference's "no privileged core" model.
 - Transport stays at the adapter boundary (httpx at the LLM/MCP transport); the four seams
   stay stdlib-pure in core.

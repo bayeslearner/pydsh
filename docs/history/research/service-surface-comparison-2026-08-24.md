@@ -1,4 +1,4 @@
-# Service-surface comparison — dshpy scoping
+# Service-surface comparison — pydsh scoping
 
 Date: 2026-08-24. Research note, not a decisions doc. Feeds the spec queue
 (what to port, in what order, how generally).
@@ -105,7 +105,7 @@ the remaining ~170 packages are UI/client modules, presets, and per-provider plu
 (`llm-deepseek`, `llm-pi-ai`, `fs-local`, `sandbox-local`, ...) — the *implementations* a user
 swaps in, not the general seams.
 
-## prismi3's backend, and what dshpy must provide for it
+## prismi3's backend, and what pydsh must provide for it
 
 From the backend survey (`src/backend/`):
 
@@ -131,7 +131,7 @@ From the backend survey (`src/backend/`):
 - **Apps**: domain apps (`splunk`, `gitlab`, `google_workspace`, `cribl`, `kestra`, `ssh`,
   `nagios`, `servicenow`, `n8n`) each an `IToolPack`; `system_tools` is the agent's core pack.
 
-### The gaps dshpy must cover for a prismi3 refactor
+### The gaps pydsh must cover for a prismi3 refactor
 
 1. **Event sourcing.** prismi3's ConversationStore is message snapshots with no durable event
    log. The reference (and spec 01) makes the session log the append-only source of truth —
@@ -143,30 +143,30 @@ From the backend survey (`src/backend/`):
    machinery. Depends on 1.
 3. **The tool pipeline as a pluggable seam.** prismi3's `safe_invoke` envelope (validation →
    role auth → timeout → size cap) is close to the reference's `tools/*` permission pipeline;
-   dshpy should expose it on plugkit's `ToolsService` so prismi3's policy/`interrupt` human-
+   pydsh should expose it on plugkit's `ToolsService` so prismi3's policy/`interrupt` human-
    approval can be a `guard`/`approver` rather than a bespoke layer.
 4. **Scoped/multi-tenant isolation.** prismi3 uses kernel "rings" + an `isolate` realm in the
    reference for grouping one agent's registrations. The reference's `core/scope` primitive
    (per-agent scoped registration) is the general mechanism.
-5. **A single queryable store.** prismi3 already uses SQLite WAL for its index; dshpy's
+5. **A single queryable store.** prismi3 already uses SQLite WAL for its index; pydsh's
    SQLite session log slots into the same file strategy, so the two combine without a new
    engine.
 
 ### What prismi3 has that the reference does not (don't generalize away)
 
-The reference explicitly has no users, roles, or tenancy — dshpy must keep that boundary.
+The reference explicitly has no users, roles, or tenancy — pydsh must keep that boundary.
 prismi3's auth (JWT/roles), CaseStore (case-kind envelope, optimistic locking), artifact store,
 workspace app system (`_apps/<app>/case_sources|tags|skills`), and the safe-invoke role gate
 are prismi3 *domain* concerns. They compose as prismi3's own plugin layers **above** the
 reference's general seams (`ctx.sessions`, `ctx.llm`, `ctx.tools`), or as prismi3-owned
-services — not as dshpy core. Otherwise dshpy stops being default/general.
+services — not as pydsh core. Otherwise pydsh stops being default/general.
 
 ## Generality rule for the port
 
-- **dshpy core = the reference's general seams + `session`/`llm`/`agent`/`tools` vocabularies.**
+- **pydsh core = the reference's general seams + `session`/`llm`/`agent`/`tools` vocabularies.**
   Provider-specific and domain-specific implementations live in plugins a consumer swaps.
 - A consumer replaces a plugin/service the way the reference intends (edit config, mount
-  another plugin), never by editing dshpy.
+  another plugin), never by editing pydsh.
 - Do not let prismi3-shaped concepts (users, roles, cases, workspace apps, safe-invoke role
   gate) leak into core. They are the *consumers'* plugins. The port stays general and default.
 
@@ -176,5 +176,5 @@ services — not as dshpy core. Otherwise dshpy stops being default/general.
   real for prismi3? First-class soon, or deferred?
 - Which provider adapters ship in core for the `ctx.llm` seam — an OpenAI-compatible one only
   (the default), with `deepseek`/`pi_ai` as plugins?
-- Does prismi3 keep `signalpy` for its own domain components and mount dshpy's services inside
-  it, or does dshpy's plugkit become the single kernel? (Affects the boot spec.)
+- Does prismi3 keep `signalpy` for its own domain components and mount pydsh's services inside
+  it, or does pydsh's plugkit become the single kernel? (Affects the boot spec.)

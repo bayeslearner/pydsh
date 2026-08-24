@@ -18,13 +18,13 @@ plugkit kernel. Long-term adoption targets: prismi3-agent and SAW.
 - `docs/design/` — stabilized cross-cutting design + anchor docs (e.g.
   `data-architecture.md`), which state-touching specs anchor to.
   `service-catalogue.md` is the **coverage contract**: the full list of what
-  dshpy ports (all of the dsh-python surface except plugkit-shipped and
+  pydsh ports (all of the dsh-python surface except plugkit-shipped and
   consumer-domain), and each service's coverage class. New specs that port a
   service anchor to it.
 - `docs/guides/` — audience-facing guides.
 - `docs/history/` — dated review sets and time-bound artifacts (each
   `/spec-review` writes a fresh `docs/history/<date>-review/`).
-- `src/dshpy/` — the package under development.
+- `src/pydsh/` — the package under development.
 - `tests/` — `pytest`; the persistence round-trip test is the MVP proof.
 
 ## Commands

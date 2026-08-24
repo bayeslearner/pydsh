@@ -1,4 +1,4 @@
-# Pillars — how dshpy (Python) succeeds
+# Pillars — how pydsh (Python) succeeds
 
 A Python port of DeepSeek Harness's service layer, built on the plugkit
 kernel. It is a drop-in backend for prismi3-agent and SAW.
