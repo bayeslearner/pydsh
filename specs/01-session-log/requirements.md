@@ -1,6 +1,6 @@
 ---
 spec_id: 01-session-log
-status: DRAFT
+status: ACTIVE
 closed_as: null
 since: 2026-08-24
 until: null
