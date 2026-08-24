@@ -13,8 +13,8 @@ backend is refactored onto this port.
   233 `package.json`s under `packages/`, READMEs + `docs/subsystems/*` + `docs/architecture.md`.
 - Existing Python port to mine: `agentic-harness-eval/docs/history/clones/dsh-python`
   (havocio/dsh-python, MIT, 34.5k LOC, 98 non-test modules).
-- prismi3 backend (target adoption):
-  `~/Projects/work-prismi3-agent` `src/backend/`.
+- prismi3 backend (target adoption): that repo's `src/backend/`. A consumer
+  checkout — located per its own docs, deliberately not pinned from here.
 
 ## Field survey: other Python ports
 
