@@ -870,48 +870,48 @@ log tool arguments anywhere but the session log the consumer already owns.
     - **Requirements**: 7.1, 7.2
 
 - [ ] 2. Core
-  - [ ] 2.1 `agent/inbox.py` — the two queues, splice events, `replay`
+  - [x] 2.1 `agent/inbox.py` — the two queues, splice events, `replay`
     - **Depends**: 1.2
     - **Requirements**: 2.1–2.7
     - **Properties**: 3
-  - [ ] 2.2 `agent/assembler.py` — `BlockAssembler` + `finalize`
+  - [x] 2.2 `agent/assembler.py` — `BlockAssembler` + `finalize`
     - **Depends**: —
     - **Requirements**: 4.1–4.6
-  - [ ] 2.3 `agent/agent.py` — `AgentOptions`, the drain / turn / step machine
+  - [x] 2.3 `agent/agent.py` — `AgentOptions`, the drain / turn / step machine
     - No tool execution yet; a reply with no tool calls completes a turn.
     - **Depends**: 1.1, 2.1, 2.2, 1.4
     - **Requirements**: 3.1–3.4, 3.6–3.15, 7.1
     - **Properties**: 1, 4
-  - [ ] 2.4 Tool execution over `ctx.tools`
+  - [x] 2.4 Tool execution over `ctx.tools`
     - Schemas from the registry, JSON argument parsing, bounded parallelism,
       ordered back-fill, errors as data.
     - **Depends**: 2.3
     - **Requirements**: 3.5, 5.1–5.7
     - **Properties**: 2
-  - [ ] 2.5 `agent/registry.py` — `AgentRegistry`, `AgentLoop`, resume, teardown
+  - [x] 2.5 `agent/registry.py` — `AgentRegistry`, `AgentLoop`, resume, teardown
     - **Depends**: 2.4
     - **Requirements**: 6.1–6.7
-  - [ ] 2.6 Export surface — `pydsh.agent` and the package `__init__`
+  - [x] 2.6 Export surface — `pydsh.agent` and the package `__init__`
     - **Depends**: 2.5
 
 - [ ] 3. Tests
-  - [ ] 3.1 `test_cancel.py` — abort/idempotence/listener containment/fusion/dispose
+  - [x] 3.1 `test_cancel.py` — abort/idempotence/listener containment/fusion/dispose
     - **Depends**: 1.1
     - **Requirements**: 1.1–1.7
-  - [ ] 3.2 `test_inbox.py` — queues, splice shape, claim semantics, replay equality
+  - [x] 3.2 `test_inbox.py` — queues, splice shape, claim semantics, replay equality
     - **Depends**: 2.1
     - **Requirements**: 2.1–2.7
     - **Properties**: 3
   - [ ] 3.3 `test_assembler.py` — deltas, block-end, finish flush, no-finish flush
     - **Depends**: 2.2
     - **Requirements**: 4.1–4.6
-  - [ ] 3.4 `test_agent_loop.py` — the loop on a real kernel with a fake adapter
+  - [x] 3.4 `test_agent_loop.py` — the loop on a real kernel with a fake adapter
     - Every turn-end reason, pre-step injection and rejection, request-error
       retry, `run` while draining, cancel-then-run-again.
     - **Depends**: 2.3
     - **Requirements**: 3.1–3.15
     - **Properties**: 1, 4
-  - [ ] 3.5 `test_agent_tools.py` — order under inverted latency, malformed
+  - [x] 3.5 `test_agent_tools.py` — order under inverted latency, malformed
         arguments, unknown tool, guard denial, raising tool
     - **Depends**: 2.4
     - **Requirements**: 5.1–5.7

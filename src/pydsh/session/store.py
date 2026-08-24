@@ -93,6 +93,32 @@ class SessionStore(Service):
             self.ctx.effect(_install, f"session dispose {session_id}")
         return session
 
+    async def resume(self, id: str) -> Session:
+        """Bring a persisted session back as a live one.
+
+        A session already live is returned as it is — reloading it from disk
+        would discard whatever has been appended since the last flush, which is
+        data loss dressed up as a refresh.
+
+        The loaded session is rebound to this store's context. The backend
+        rebuilds it without one (it has no context to give), and a session with
+        no context cannot broadcast ``session/event``.
+        """
+        live = self._sessions.get(id)
+        if live is not None:
+            return live
+        if self._persistence is None:
+            raise SessionError(
+                f"cannot resume session {id!r}: no persistence backend is "
+                "attached; call sessions.attach_persistence(...) first"
+            )
+        session = await self._persistence.load(id)
+        if session is None:
+            raise SessionError(f"no persisted session {id!r} to resume")
+        session.ctx = self.ctx
+        self._sessions[id] = session
+        return session
+
     def get(self, id: str) -> Optional[Session]:
         return self._sessions.get(id)
 

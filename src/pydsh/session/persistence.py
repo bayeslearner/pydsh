@@ -28,7 +28,11 @@ CREATE TABLE IF NOT EXISTS sessions (
     id         TEXT PRIMARY KEY,
     version    INTEGER NOT NULL,
     created_at REAL NOT NULL,
-    cwd        TEXT
+    cwd        TEXT,
+    -- The call config the last step ran under, as JSON. Header metadata, not
+    -- conversation content: a resumed session continues on the same route
+    -- rather than silently falling back to whatever the caller passes next.
+    request    TEXT
 );
 CREATE TABLE IF NOT EXISTS events (
     session_id TEXT NOT NULL,
@@ -42,6 +46,11 @@ CREATE TABLE IF NOT EXISTS events (
     FOREIGN KEY (session_id) REFERENCES sessions(id)
 );
 """
+
+
+def _encode_request(request: Any) -> Optional[str]:
+    """The header's call config as the JSON text the ``request`` column holds."""
+    return None if request is None else json.dumps(request)
 
 
 class SessionPersistenceError(SessionError):
@@ -94,9 +103,15 @@ class SqliteSessionPersistence(SessionPersistence):
         header = payload["header"]
         with self._conn:
             self._conn.execute(
-                "INSERT OR REPLACE INTO sessions (id, version, created_at, cwd)"
-                " VALUES (?, ?, ?, ?)",
-                (header["id"], header["version"], header["created_at"], header["cwd"]),
+                "INSERT OR REPLACE INTO sessions"
+                " (id, version, created_at, cwd, request) VALUES (?, ?, ?, ?, ?)",
+                (
+                    header["id"],
+                    header["version"],
+                    header["created_at"],
+                    header["cwd"],
+                    _encode_request(header.get("request")),
+                ),
             )
             for e in payload["events"]:
                 self._conn.execute(
@@ -120,20 +135,24 @@ class SqliteSessionPersistence(SessionPersistence):
         Ensures the header row exists first: a store ``create`` does not
         persist until the first flush, so the ``sessions`` row may be absent
         when a flush arrives.
+
+        The header is written on every flush, not only when events are new.
+        Events are the append-only part; the header is mutable state (the call
+        config the last step ran under), and skipping the write when no event
+        happened to follow it would drop that change on the floor.
         """
         from_seq = self._persisted_seq.get(id(session), 0)
         fresh = [e for e in session.events if e.seq > from_seq]
-        if not fresh:
-            return
         with self._conn:
             self._conn.execute(
-                "INSERT OR REPLACE INTO sessions (id, version, created_at, cwd)"
-                " VALUES (?, ?, ?, ?)",
+                "INSERT OR REPLACE INTO sessions"
+                " (id, version, created_at, cwd, request) VALUES (?, ?, ?, ?, ?)",
                 (
                     session.id,
                     session.header.version,
                     session.header.created_at,
                     session.header.cwd,
+                    _encode_request(session.header.request),
                 ),
             )
             for e in fresh:
@@ -154,11 +173,12 @@ class SqliteSessionPersistence(SessionPersistence):
 
     def _read(self, id: str) -> Optional[dict]:
         row = self._conn.execute(
-            "SELECT version, created_at, cwd FROM sessions WHERE id = ?", (id,)
+            "SELECT version, created_at, cwd, request FROM sessions WHERE id = ?",
+            (id,),
         ).fetchone()
         if row is None:
             return None
-        version, created_at, cwd = row
+        version, created_at, cwd, request = row
         if version != SESSION_FORMAT_VERSION:
             raise SessionFormatUnsupportedError(
                 f"session {id!r} has format version {version}, expected "
@@ -173,6 +193,7 @@ class SqliteSessionPersistence(SessionPersistence):
             "id": id,
             "created_at": created_at,
             "cwd": cwd,
+            "request": json.loads(request) if request else None,
             "events": [
                 {
                     "type": r[0],
@@ -210,6 +231,7 @@ class SqliteSessionPersistence(SessionPersistence):
                 "id": payload["id"],
                 "created_at": payload["created_at"],
                 "cwd": payload["cwd"],
+                "request": payload["request"],
             },
             "events": payload["events"],
         }
