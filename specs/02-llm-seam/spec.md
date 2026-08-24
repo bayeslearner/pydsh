@@ -513,63 +513,63 @@ returns a verdict rather than a raw echo of the offending value.
     - **Requirements**: 1.4, 1.5
     - **Properties**: 2
 
-- [ ] 2. Core — the seam's parts
-  - [ ] 2.1 `llm/chunks.py` — `ChunkType`, `StreamChunk`, `GenerateOptions`
+- [x] 2. Core — the seam's parts
+  - [x] 2.1 `llm/chunks.py` — `ChunkType`, `StreamChunk`, `GenerateOptions`
     - Plus `is_token_delta` (moved here per Decisions).
     - **Depends**: —
     - **Requirements**: 4.4
-  - [ ] 2.2 `llm/errors.py` — `LlmError` + `normalize_api_key`
+  - [x] 2.2 `llm/errors.py` — `LlmError` + `normalize_api_key`
     - **Depends**: —
     - **Requirements**: 3.1, 4.6
-  - [ ] 2.3 `llm/call_config.py` — the three-layer merge
+  - [x] 2.3 `llm/call_config.py` — the three-layer merge
     - **Depends**: —
     - **Requirements**: 2.1, 2.2, 2.3, 2.4
     - **Properties**: 1
-  - [ ] 2.4 `llm/retry.py` — policy resolution + backoff
+  - [x] 2.4 `llm/retry.py` — policy resolution + backoff
     - **Depends**: 2.2
     - **Requirements**: 3.1, 3.2, 3.3, 3.4
-  - [ ] 2.5 `llm/attribution.py` — identity + headers
+  - [x] 2.5 `llm/attribution.py` — identity + headers
     - **Depends**: —
     - **Requirements**: 5.1, 5.2, 5.3
-  - [ ] 2.6 `llm/adapter.py` — the `LlmAdapter` ABC
+  - [x] 2.6 `llm/adapter.py` — the `LlmAdapter` ABC
     - **Depends**: 2.1
     - **Requirements**: 4.4, 4.6
 
-- [ ] 3. Core — the service
-  - [ ] 3.1 `llm/service.py` — registry, handles, `llm/adapters-updated`
+- [x] 3. Core — the service
+  - [x] 3.1 `llm/service.py` — registry, handles, `llm/adapters-updated`
     - All-or-nothing binding; handle release; replace.
     - **Depends**: 2.6
     - **Requirements**: 4.1, 4.2, 4.3, 4.7
-  - [ ] 3.2 `llm/service.py` — `stream` through the waterfall + retry
+  - [x] 3.2 `llm/service.py` — `stream` through the waterfall + retry
     - Config merge, `llm/stream` waterfall, the I5 emission latch.
     - **Depends**: 3.1, 2.3, 2.4
     - **Requirements**: 4.4, 4.5, 3.5
     - **Properties**: 3
-  - [ ] 3.3 `llm/token_meter.py` — `ctx.token_meter`
+  - [x] 3.3 `llm/token_meter.py` — `ctx.token_meter`
     - **Depends**: 1.1
     - **Requirements**: 6.1, 6.2, 6.3
 
-- [ ] 4. Tests
+- [x] 4. Tests
   - [x] 4.1 `test_message.py` — vocabulary + round-trip property
     - **Depends**: 1.2
     - **Requirements**: 1.1–1.5
     - **Properties**: 2
-  - [ ] 4.2 `test_call_config.py` — the precedence table
+  - [x] 4.2 `test_call_config.py` — the precedence table
     - **Depends**: 2.3
     - **Properties**: 1
-  - [ ] 4.3 `test_retry.py` — modes, bounds, config rejection
+  - [x] 4.3 `test_retry.py` — modes, bounds, config rejection
     - **Depends**: 2.4
     - **Requirements**: 3.1–3.4
-  - [ ] 4.4 `test_attribution.py` — header shape + no-secrets assertion
+  - [x] 4.4 `test_attribution.py` — header shape + no-secrets assertion
     - **Depends**: 2.5
     - **Requirements**: 5.1–5.3
-  - [ ] 4.5 `test_llm_service.py` — the seam, on a real kernel context
+  - [x] 4.5 `test_llm_service.py` — the seam, on a real kernel context
     - Fake adapter; registry lifecycle; waterfall middleware wrapping;
       no-duplicate-on-retry.
     - **Depends**: 3.2
     - **Requirements**: 4.1–4.7, 3.5
     - **Properties**: 3
-  - [ ] 4.6 `test_token_meter.py` — estimation + surface measurement
+  - [x] 4.6 `test_token_meter.py` — estimation + surface measurement
     - **Depends**: 3.3
     - **Requirements**: 6.1–6.3
 
