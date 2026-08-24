@@ -46,6 +46,28 @@ plugkit ships as an installable package in
 documents the kernel semantics that the TS reference (dsh's documentation)
 also describes.
 
+## Reference checkouts — the source this repo ports from
+
+`reference/` holds the two upstreams, **git-ignored** (they are clones, not our
+code, and one is 85M):
+
+```bash
+git clone --depth 1 https://github.com/havocio/dsh-python      reference/dsh-python
+git clone --depth 1 https://github.com/deepseek-ai/deepseek-harness reference/deepseek-harness
+```
+
+- `reference/dsh-python/dsh_py/` — the Python port being adapted. Its comments
+  are Chinese; port the *semantics*, write English docs.
+- `reference/deepseek-harness/` — the TypeScript original, the semantic
+  authority when the Python port and the TS disagree.
+
+Read the reference module **before** porting it — the method is adapt-then-modify,
+never a clean-room sketch from the catalogue row. Where a deviation is
+deliberate, record it in that sprint's Decisions.
+
+If this repo lives inside Dropbox, keep `reference/` out of sync:
+`xattr -w com.dropbox.ignored 1 reference`.
+
 ## Spec-driven discipline (hard rules)
 
 - One sprint ACTIVE at a time, worked in numeric order. Start-from-recent is

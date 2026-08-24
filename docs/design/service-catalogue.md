@@ -13,7 +13,8 @@ The dsh-python README §6 "复刻进度 (replication progress)" is the upstream
 author's own coverage map: Layer 0 kernel / Layer 2 three seams (Session,
 Agent, LLM) / Layer 3 support services / Layer 4 app layer / extra adapters,
 all ✅. This catalogue is that map, re-generated against pydsh's kernel choice:
-Layer 0 (fiber/scope/schema/loader/hmr) is **plugkit-shipped**, every seam
+Layer 0 (`context`, `fiber`, `reflect`, `registry`, `service`, `events`,
+`logger`, `signal`, `loader`, `hmr`, `schema`) is **plugkit-shipped**, every seam
 and support service is **core**, Layer 4 is **app-layer**, the provider
 adapters are **provider-domain**, and prismi3-shaped concepts are
 **consumer-domain**.
@@ -76,7 +77,40 @@ adapters are **provider-domain**, and prismi3-shaped concepts are
 | `tools` (ctx.tools) | **plugkit-shipped** | reuse `ToolsService`; map reference semantics onto it, don't re-port |
 | `guard_repeat_tool` | core (a guard plugin) | listens `tools/post-execute` |
 | `guard_timeout` | core (a guard plugin) | listens `tools/execute`; or plugkit `timeout_policy` |
-| tool plugins: `tool_bash`, `tool_fs`, `tool_goal`, `tool_jobs`, `tool_terminal`, `tool_todo` | **provider/plugin** | ported as the reference's `*‑tool` plugins; each is a `ctx.tools.register` + handlers |
+| the `tool_*` plugins | **plugin** | see the Default plugins table below — every one is a `ctx.tools.register` + handlers |
+
+### Default plugins (the reference's whole plugin layer)
+
+Parity is at the **service *and* default-behaviour level**: the services are the
+seams, and these 17 plugins are the default behaviour that proves the seams
+compose. They are the pieces a consumer swaps rather than writes. Every one is
+mounted, none is privileged — replacing any is a matter of mounting another
+plugin that provides the same contribution.
+
+| Plugin | Class | Seam it exercises |
+|---|---|---|
+| `tool_bash` | plugin | `tools` + `shell` |
+| `tool_fs` | plugin | `tools` + `fs` |
+| `tool_terminal` | plugin | `tools` + `terminal` |
+| `tool_todo` | plugin | `tools` |
+| `tool_goal` | plugin | `tools` + `goal` |
+| `tool_jobs` | plugin | `tools` + `jobs` |
+| `subagent` | plugin | `agent` (child session + create_agent) |
+| `guard_repeat_tool` | plugin | `tools/post-execute` |
+| `guard_timeout` | plugin | `tools/execute` |
+| `spill_policy` | plugin | `spill` + `tools/post-execute` |
+| `long_term_memory` | plugin | `agent` `turn/end` recall |
+| `hooks` | plugin | `hooks_protocol` |
+| `time_context` | plugin | `agent/pre-step` context injection |
+| `system_instructions` | plugin | `agent/pre-step` context injection |
+| `command_goal` | plugin | `commands` + `goal` |
+| `command_feedback` | plugin | `commands` + `message_feedback` |
+| `command_compact` | plugin | `commands` + `compaction` |
+
+The two `*_context`/`instructions` plugins matter more than their size suggests:
+they are the reference's demonstration that context reaches the model as
+*model-visible history* with a plugin `MessageSource`, not by mutating the system
+prompt. A port that skips them loses the proof that the injection seam works.
 
 ### Storage / capability seams
 
