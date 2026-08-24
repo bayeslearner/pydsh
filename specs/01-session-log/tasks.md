@@ -11,8 +11,8 @@
 
 - [ ] 1. Foundation
   - [ ] 1.1 Scaffold package and tooling
-    - `pyproject.toml` (project `dsh`, package at `src/dsh`, path dep on the
-      local plugkit kernel), `uv.lock` via `uv sync`, `src/dsh/` layout,
+    - `pyproject.toml` (project `dshpy`, package at `src/dshpy`, path dep on the
+      local plugkit kernel), `uv.lock` via `uv sync`, `src/dshpy/` layout,
       `.gitignore`.
     - **Depends**: —
     - **Requirements**: —

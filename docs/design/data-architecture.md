@@ -11,8 +11,8 @@ model calls live there, composed as plugins above this layer). dsh builds the
 
 | Tier | Owns | Lives in |
 |---|---|---|
-| **Storage** | the durable session log on disk (SQLite) | `src/dsh/session/` |
-| **Computation** | the in-memory ordered surface (`derive_messages`), projection, invariant checks | `src/dsh/session/` |
+| **Storage** | the durable session log on disk (SQLite) | `src/dshpypypy/session/` |
+| **Computation** | the in-memory ordered surface (`derive_messages`), projection, invariant checks | `src/dshpypypy/session/` |
 | **Business** | the agent loop, tools, prompt assembly, model calls | *not this repo* |
 
 Boundary contract: **storage ↔ computation is the append-only event log.** The

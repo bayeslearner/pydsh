@@ -51,7 +51,7 @@ the Sources block. `'][~publish'` skip importing the kernel through PyPI.
 ## Directory Structure
 
 ```
-src/dsh/
+src/dshpy/
   __init__.py            # package marker + re-exports
   session/
     __init__.py          # public surface: Session, SessionStore, session_events

@@ -20,7 +20,7 @@ plugkit kernel. Long-term adoption targets: prismi3-agent and SAW.
 - `docs/guides/` — audience-facing guides.
 - `docs/history/` — dated review sets and time-bound artifacts (each
   `/spec-review` writes a fresh `docs/history/<date>-review/`).
-- `src/dsh/` — the package under development.
+- `src/dshpypypy/` — the package under development.
 - `tests/` — `pytest`; the persistence round-trip test is the MVP proof.
 
 ## Commands
