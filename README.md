@@ -104,14 +104,21 @@ uv run pytest tests  # the suite
 - **Pending input that survives a restart** (`Inbox`): messages delivered but
   not yet processed live in two queues whose every change is a session event,
   so `Inbox.replay(session)` rebuilds them exactly.
+- **The system prompt as a registry** (`pydsh.prompt`, `ctx.system_prompt`):
+  ordered sections a plugin contributes without seeing the whole, runtime
+  contexts, strict `{{variable}}` interpolation that fails loudly rather than
+  rendering a broken prompt, and a configurable tool order. Mounted, the loop
+  builds its system prompt from it; unmounted, it falls back to
+  `AgentOptions.system`.
 - **Cancellation** (`pydsh.cancel`): `AbortSignal` semantics, with two scopes
   per agent. `cancel()` stops the work in flight and leaves the agent usable;
   only a lifetime abort — the caller tearing down, or the loop being unmounted
   — ends it.
 
 No provider adapter ships here — `openai_compatible`, `deepseek` and `pi_ai`
-are plugins in a later sprint. `system_prompt` and `plan_mode` (the rest of the
-Agent seam) and the wider service catalogue are queued in the order
+are plugins in a later sprint. `plan_mode` (the rest of the Agent seam, which
+needs commands and projections first) and the wider service catalogue are
+queued in the order
 [`docs/design/service-catalogue.md`](docs/design/service-catalogue.md) defines.
 
 ## Where each kind of truth lives

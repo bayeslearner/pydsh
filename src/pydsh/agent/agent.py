@@ -333,7 +333,7 @@ class Agent:
         await self.ctx.parallel(
             REQUEST, {"agent": self, "turn": turn, "step": step, "signal": signal}
         )
-        options = self._build_request(signal)
+        options = await self._build_request(turn, step, signal)
         # The route this epoch is running under, kept on the header so a
         # resumed session continues on the same provider and model.
         self.session.header.request = call_config_from_options(options)
@@ -370,20 +370,50 @@ class Agent:
         results = await self._execute_tool_calls(calls, turn, step, signal)
         return None, results
 
-    def _build_request(self, signal: CancelSignal) -> GenerateOptions:
+    async def _build_request(
+        self, turn: int, step: int, signal: CancelSignal
+    ) -> GenerateOptions:
         """Assemble the model request from the log and the mounted services."""
         # The log holds encoded payloads; the adapter speaks the vocabulary.
         messages = [decode_payload(m) for m in self.session.derive_messages()]
+        system, tools = await self._system_and_tools(turn, step, signal)
         return GenerateOptions(
             provider=self.options.provider,
             model=self.options.model,
             messages=messages,
-            system=self.options.system or None,
-            tools=self._tool_schemas(),
+            system=system,
+            tools=tools,
             max_tokens=self.options.max_tokens,
             signal=signal,
             session_id=self.id,
         )
+
+    async def _system_and_tools(
+        self, turn: int, step: int, signal: CancelSignal
+    ) -> tuple[Optional[str], Optional[list[dict]]]:
+        """The system prompt and the tool list for this step.
+
+        With ``ctx.system_prompt`` mounted, both come from an assembly, so a
+        plugin's registered section reaches the model without the agent knowing
+        the plugin exists. Without it, the agent falls back to the single
+        string its options carry — which is the whole seam sprint 03 left open.
+        """
+        prompt = getattr(self._root, "system_prompt", None)
+        if prompt is None:
+            return self.options.system or None, self._tool_schemas()
+
+        assembly = await prompt.assemble(
+            {
+                "agent": self,
+                "session": self.session,
+                "turn": turn,
+                "step": step,
+                "signal": signal,
+            }
+        )
+        # An empty prompt is not an empty string: providers treat a present-but
+        # -blank system message differently from an absent one.
+        return prompt.render_prompt(assembly) or None, assembly.tools or None
 
     def _tools(self) -> Any:
         """The tools service, or ``None`` when none is mounted."""

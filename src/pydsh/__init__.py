@@ -57,6 +57,12 @@ from .llm import (
     merge_call_config,
     resolve_retry_policy,
 )
+from .prompt import (
+    PromptAssembly,
+    PromptContext,
+    PromptSection,
+    SystemPrompt,
+)
 from .message import (
     ContentBlock,
     Message,
@@ -132,6 +138,11 @@ __all__ = [
     # cancellation
     "CancelSignal",
     "CancelledError",
+    # system prompt
+    "SystemPrompt",
+    "PromptSection",
+    "PromptContext",
+    "PromptAssembly",
     # metering
     "TokenMeter",
     # vocabulary
