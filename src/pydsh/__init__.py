@@ -49,6 +49,7 @@ from .boot import (
 )
 from .cancel import CancelledError, CancelSignal
 from .console import CompactCommand, FeedbackCommand, GoalCommand, record_feedback
+from .gateway import Gateway
 from .mcp import McpClient, McpClientPlugin, McpError, public_tool_name
 from .plan import PlanMode, PlanModeError, fold_plan_mode
 from .runtime import (
@@ -373,6 +374,7 @@ __all__ = [
     "RemoteSession",
     "JsonRpcTransport",
     "TransportClosed",
+    "Gateway",
     # cancellation
     "CancelSignal",
     "CancelledError",

@@ -24,6 +24,13 @@ dependencies = [
 # opens no sockets.
 [project.optional-dependencies]
 http = ["httpx>=0.27"]
+# The WebSocket gateway's binding. Optional for the same reason: the gateway's
+# own logic needs no library, and a consumer fronting it with their own server
+# should not be made to install one.
+ws = ["websockets>=13"]
+
+[project.scripts]
+pydsh = "pydsh.cli:main"
 
 [build-system]
 requires = ["hatchling"]

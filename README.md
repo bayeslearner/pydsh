@@ -21,6 +21,18 @@ pydsh installs from git; it pulls the pinned `plugkit` kernel with it.
 
 ```bash
 uv add "pydsh @ git+https://github.com/bayeslearner/pydsh@v0.2.2"
+
+# Optional extras, both lazily imported:
+#   [http] — the built-in HTTP transport for the provider adapters (httpx)
+#   [ws]   — the WebSocket binding for the gateway (websockets)
+uv add "pydsh[http,ws] @ git+https://github.com/bayeslearner/pydsh@v0.2.2"
+```
+
+It also installs a `pydsh` command:
+
+```bash
+pydsh --profile my_profile.py chat --provider openai --model gpt-4o "what changed?"
+pydsh --profile my_profile.py gateway --port 8080      # needs [ws]
 ```
 
 ```python
@@ -268,14 +280,22 @@ uv run pytest tests  # the suite
   a conversation it is not hosting. Inbound requests are served concurrently,
   which is what lets a handler call back into its peer instead of deadlocking
   against the loop that would deliver the answer.
+- **The gateway and the CLI** (`pydsh.gateway`, `pydsh`): the runtime over a
+  socket, and a command in someone's hands. Each client gets its *own*
+  `RuntimeServer` and its own event subscription, which is what stops two
+  clients seeing each other's conversations. `pydsh chat`, `pydsh sessions`,
+  `pydsh runtime`, `pydsh gateway` — and an expected failure prints one line,
+  not a stack.
 - **Cancellation** (`pydsh.cancel`): `AbortSignal` semantics, with two scopes
   per agent. `cancel()` stops the work in flight and leaves the agent usable;
   only a lifetime abort — the caller tearing down, or the loop being unmounted
   — ends it.
 
-Still to come: the WebSocket transport, the HTTP gateway, and the CLI. Everything else in
-[`docs/design/service-catalogue.md`](docs/design/service-catalogue.md) is
-ported.
+**The port is complete.** All 84 modules of the reference are accounted for in
+[`docs/design/service-catalogue.md`](docs/design/service-catalogue.md): 77
+ported, 7 recorded there as deliberately out of scope with the reason — two
+that plugkit already ships, one that is a convention rather than a module, and
+four that are a consumer's choice rather than a general seam.
 
 ## Where each kind of truth lives
 

@@ -177,6 +177,28 @@ generality rule. Excluding them is the point, not a gap:
 - **A role-gated safe-invoke** — the general `tools/*` pipeline is provided here;
   the roles half is a `guard`/`approver` the consumer writes.
 
+### Reference modules with no counterpart here, and why
+
+Every other module of the reference is ported. These five are not, each for a
+stated reason rather than because nobody got to them:
+
+| Module | Why not |
+|---|---|
+| `tools` | **plugkit-shipped.** `ToolsService` is the same five-stage pipeline; a second one would be two implementations of one concern |
+| `guard_timeout` | **plugkit-shipped.** `timeout_policy` is the same stage-3 wrapper over each tool's own budget |
+| `brand` | **a convention, not a module.** The reference's file is a type alias and a docstring with no runtime behaviour. The convention it documents — one `str` subclass per id type, built through its owner's factory — is the rule here; porting the empty module to claim the row would be paper coverage |
+| `hooks` | **consumer-domain.** `hooks_protocol` (the dialect-neutral seam) *is* ported; the dialect plugins encode one product's conventions |
+| `watcher` | **not a seam.** plugkit owns plugin lifecycle, and whether to reload on a config change is a consumer's policy, not a general capability |
+| `native_command` | **an OS helper with no consumer here.** It exists for the reference's CLI integrations; nothing in this core calls it, and a helper with no caller is surface without a contract |
+| `launch_environment` | **folded into `boot/envfile.py`**, which does the layering the reference split across two files |
+
+## Coverage as of 2026-08-25
+
+All 84 modules of `dsh-python` are accounted for: **77 ported**, **7 recorded
+above**. The gate is `uv run pytest tests -q` — 1264 tests, including a real
+child process speaking JSON-RPC, real subprocess kills by process group, and a
+persistence round-trip across two processes.
+
 ## General rule (the how)
 
 - **Core = the reference's general seams + the shared value vocabulary**

@@ -102,7 +102,20 @@ class RuntimeServer:
                 self._releases.append(release)
 
     def _on_session_event(self, session: Any, event: Any) -> None:
-        """Forward one append. Contained — see `notify` (I3)."""
+        """Forward one append, **if this connection is in that conversation**.
+
+        `session/event` fires for every session in the context, and a gateway
+        runs one server per client over *one* shared context — so forwarding
+        everything sends each client every other client's conversation. The
+        filter is which sessions this connection has actually touched, not
+        which it created: two clients naming the same session are genuinely in
+        it together and both should see it.
+
+        Contained — see `notify` (I3).
+        """
+        session_id = getattr(session, "id", None)
+        if session_id not in self._agents:
+            return
         self.transport.notify(
             EVENT_NOTIFICATION,
             {
@@ -116,6 +129,8 @@ class RuntimeServer:
 
     def _on_agent_status(self, payload: Any) -> None:
         agent = (payload or {}).get("agent") if isinstance(payload, dict) else None
+        if getattr(agent, "id", None) not in self._agents:
+            return  # another connection's agent
         self.transport.notify(
             STATUS_NOTIFICATION,
             {
