@@ -43,7 +43,7 @@ from .catalogue import (
 from .pi_ai import (
     PiAi,
     PiAiAdapter,
-    ProfileError,
+    ProviderProfileError,
     build_wire_request,
     request_headers,
     resolve_profiles,
@@ -111,7 +111,7 @@ __all__ = [
     # the catalogue adapter
     "PiAi",
     "PiAiAdapter",
-    "ProfileError",
+    "ProviderProfileError",
     "resolve_profiles",
     "resolve_wire_reasoning",
     "thinking_format_of",

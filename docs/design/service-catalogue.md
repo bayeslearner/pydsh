@@ -157,10 +157,10 @@ prompt. A port that skips them loses the proof that the injection seam works.
 
 | Module | Class | Note |
 |---|---|---|
-| `sdk` (in-process + jsonrpc) | app-layer | thin over core |
+| `sdk` (in-process) | app-layer | `Harness` / `HarnessSession` / `RunResult`. Named for what it is rather than after a vendor — this repo is a general core. The JSON-RPC form is queued behind it |
 | `client` / `server` / `protocol` / `bridge` / `gateway` / `websocket` | app-layer | the JSON-RPC/WebSocket/gateway tier |
 | `cli` | app-layer | the harness CLI |
-| `dsh_config` / `env` / `profile` / `config` / `loader` / `watcher` | app-layer / plugkit | boot layers; plugkit's `load_app`/`FileLoader` covers load; keep the entry shells |
+| `env` / `profile` / `loader` / `home_paths` | app-layer | `pydsh.boot`: layered `.env` (bootstrap-prefixed names refused from a file), profiles as data resolved before anything mounts, and one home resolution. `watcher` is **not** ported — plugkit owns plugin lifecycle and a config watcher is a consumer's choice |
 | `home_paths` / `launch_environment` | app-layer | install/locate helpers |
 
 ## What is consciously NOT ported into core

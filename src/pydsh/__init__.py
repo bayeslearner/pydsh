@@ -38,6 +38,15 @@ from .agent import (
     Inbox,
     SubagentTool,
 )
+from .boot import (
+    Harness,
+    HarnessSession,
+    ProfileError,
+    RunResult,
+    core_profile,
+    load_layered_env,
+    resolve_home,
+)
 from .cancel import CancelledError, CancelSignal
 from .console import CompactCommand, FeedbackCommand, GoalCommand, record_feedback
 from .mcp import McpClient, McpClientPlugin, McpError, public_tool_name
@@ -56,7 +65,7 @@ from .llm import (
     DeepSeek,
     OpenAICompatible,
     PiAi,
-    ProfileError,
+    ProviderProfileError,
     ProviderConfig,
     Transport,
     ResolvedRetryPolicy,
@@ -208,6 +217,14 @@ __version__ = _resolve_version()
 
 __all__ = [
     "__version__",
+    # the front door
+    "Harness",
+    "HarnessSession",
+    "RunResult",
+    "core_profile",
+    "ProfileError",
+    "resolve_home",
+    "load_layered_env",
     # session seam
     "SessionStore",
     "Session",
@@ -319,7 +336,7 @@ __all__ = [
     "OpenAICompatible",
     "DeepSeek",
     "PiAi",
-    "ProfileError",
+    "ProviderProfileError",
     "ProviderConfig",
     "Transport",
     # agent seam

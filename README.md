@@ -24,6 +24,24 @@ uv add "pydsh @ git+https://github.com/bayeslearner/pydsh@v0.2.2"
 ```
 
 ```python
+from pydsh import AgentOptions, Harness, OpenAICompatible, core_profile
+
+profile = [*core_profile(), (OpenAICompatible, {})]
+
+async with Harness(profile, options=AgentOptions(provider="openai", model="gpt-4o")) as h:
+    result = await h.session("my-chat").run("what changed today?")
+    print(result.final_response)
+```
+
+`Harness` assembles a context from a profile, runs turns on named sessions, and
+unmounts everything when its scope ends — including when the turn raised. The
+answer comes back read out of the session log, so it is the same string a reader
+of the transcript sees.
+
+Nothing stops you mounting the seams yourself; the harness is the short path,
+not the only one:
+
+```python
 from plugkit import Context, PointsService, ToolsService
 from pydsh import AgentLoop, AgentOptions, AgentRegistry, LlmService, SessionStore, TokenMeter
 
@@ -237,12 +255,18 @@ uv run pytest tests  # the suite
   leaving the model with none of that server's tools), and each connection is
   supervised: bounded backoff, then giving up and taking the tools away rather
   than offering what cannot run.
+- **The front door** (`pydsh.boot`, `Harness`): assemble, run, tear down.
+  Under it: one answer to where a deployment keeps things (`~/.pydsh`, resolved
+  in one place so two services cannot disagree); a layered environment where an
+  inherited value always wins and a `.env` may *not* set a variable that decided
+  how the process boots; and profiles as **data**, fully resolved before
+  anything mounts, so a typo in entry nine cannot leave eight plugins running.
 - **Cancellation** (`pydsh.cancel`): `AbortSignal` semantics, with two scopes
   per agent. `cancel()` stops the work in flight and leaves the agent usable;
   only a lifetime abort — the caller tearing down, or the loop being unmounted
   — ends it.
 
-Still to come: the app layer (SDK, gateway, CLI). Everything else in
+Still to come: the JSON-RPC server, WebSocket transport, gateway and CLI. Everything else in
 [`docs/design/service-catalogue.md`](docs/design/service-catalogue.md) is
 ported.
 

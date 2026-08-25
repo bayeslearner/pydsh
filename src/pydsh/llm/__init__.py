@@ -27,7 +27,7 @@ from .adapters import (
     OpenAICompatibleAdapter,
     PiAi,
     PiAiAdapter,
-    ProfileError,
+    ProviderProfileError,
     ProviderConfig,
     Transport,
     httpx_transport,
@@ -71,7 +71,7 @@ __all__ = [
     "ProviderConfig",
     "PiAi",
     "PiAiAdapter",
-    "ProfileError",
+    "ProviderProfileError",
     "Transport",
     "httpx_transport",
     # call config

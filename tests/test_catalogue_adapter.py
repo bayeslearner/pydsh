@@ -22,7 +22,7 @@ from pydsh import (
     LlmError,
     LlmService,
     PiAi,
-    ProfileError,
+    ProviderProfileError,
     TextBlock,
     create_user_message,
 )
@@ -176,13 +176,13 @@ async def test_an_unknown_route_is_declarable_entirely_from_config():
 
 
 async def test_an_unknown_route_without_a_base_url_is_refused():
-    with pytest.raises(ProfileError) as caught:
+    with pytest.raises(ProviderProfileError) as caught:
         resolve_profiles({"acme": {"models": [{"id": "x"}]}})
     assert "base_url" in str(caught.value)
 
 
 async def test_an_unknown_route_without_models_is_refused():
-    with pytest.raises(ProfileError) as caught:
+    with pytest.raises(ProviderProfileError) as caught:
         resolve_profiles({"acme": {"base_url": "https://acme/v1"}})
     assert "models" in str(caught.value)
 
@@ -202,26 +202,26 @@ async def test_an_unknown_route_without_models_is_refused():
 )
 async def test_nothing_unsupported_is_accepted(config, expected):
     """Property 2 (R2.4, I1) — refused at mount, with the supported set named."""
-    with pytest.raises(ProfileError) as caught:
+    with pytest.raises(ProviderProfileError) as caught:
         resolve_profiles({"openai": config})
     assert expected in str(caught.value)
 
 
 async def test_the_refusal_names_the_route():
-    with pytest.raises(ProfileError) as caught:
+    with pytest.raises(ProviderProfileError) as caught:
         resolve_profiles({"my-proxy": {"base_url": "http://x/v1", "api": "grpc"}})
     assert "my-proxy" in str(caught.value)
 
 
 async def test_an_override_naming_an_unknown_model_is_refused_not_skipped():
     """R2.5 — a typo that silently does nothing is a config that lies."""
-    with pytest.raises(ProfileError) as caught:
+    with pytest.raises(ProviderProfileError) as caught:
         resolve_profiles({"openai": {"model_overrides": {"gpt-5o": {"max_tokens": 1}}}})
     assert "gpt-5o" in str(caught.value)
 
 
 async def test_models_and_overrides_together_are_refused():
-    with pytest.raises(ProfileError) as caught:
+    with pytest.raises(ProviderProfileError) as caught:
         resolve_profiles(
             {
                 "openai": {
@@ -245,7 +245,7 @@ async def test_models_and_overrides_together_are_refused():
 )
 async def test_a_bad_reasoning_effort_table_is_refused(efforts, expected):
     """R2.6, R2.7."""
-    with pytest.raises(ProfileError) as caught:
+    with pytest.raises(ProviderProfileError) as caught:
         resolve_profiles(
             {
                 "acme": {
@@ -332,7 +332,7 @@ async def test_no_providers_resolves_to_nothing():
 
 
 async def test_a_list_of_providers_is_refused():
-    with pytest.raises(ProfileError) as caught:
+    with pytest.raises(ProviderProfileError) as caught:
         resolve_profiles([{"provider": "openai"}])
     assert "mapping" in str(caught.value)
 
@@ -556,5 +556,5 @@ async def test_an_unserviceable_config_fails_at_mount_not_at_request():
     """I1 — the whole point of resolving once, up front."""
     root = Context()
     await root.plugin(LlmService)
-    with pytest.raises(ProfileError):
+    with pytest.raises(ProviderProfileError):
         await root.plugin(PiAi, {"providers": {"openai": {"api": "anthropic-messages"}}})

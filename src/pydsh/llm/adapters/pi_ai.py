@@ -66,12 +66,17 @@ UNSERVICEABLE_KEYS = (
 )
 
 
-class ProfileError(ValueError):
-    """A route this build cannot serve. Raised at mount, never at request."""
+class ProviderProfileError(ValueError):
+    """A route this build cannot serve. Raised at mount, never at request.
+
+    Named apart from :class:`pydsh.boot.ProfileError`, which is about a
+    *plugin* profile. Both are "a profile that cannot be mounted" and they
+    are different things; one name for both is a coin flip at every import.
+    """
 
 
 def _invalid(provider: str, detail: str) -> None:
-    raise ProfileError(f"pi-ai route {provider!r} {detail}")
+    raise ProviderProfileError(f"pi-ai route {provider!r} {detail}")
 
 
 # --------------------------------------------------------------------------- #
@@ -275,20 +280,20 @@ def resolve_route_models(provider: str, route: dict) -> dict:
 def resolve_profiles(providers: Any) -> dict[str, dict]:
     """Resolve every configured route. **The only place config is read.**
 
-    :raises ProfileError: anything this build cannot serve, naming the field
+    :raises ProviderProfileError: anything this build cannot serve, naming the field
         and the supported set (I1).
     """
     if providers is None:
         return {}
     if not isinstance(providers, dict):
-        raise ProfileError(
+        raise ProviderProfileError(
             "pi-ai `providers` is a mapping keyed by route name, not a list"
         )
 
     resolved: dict[str, dict] = {}
     for provider, source in providers.items():
         if not isinstance(provider, str) or not provider:
-            raise ProfileError("pi-ai route names must be non-empty strings")
+            raise ProviderProfileError("pi-ai route names must be non-empty strings")
         if not isinstance(source, dict):
             _invalid(provider, "must be a mapping")
 
@@ -702,7 +707,7 @@ class PiAi(Service):
 __all__ = [
     "PiAi",
     "PiAiAdapter",
-    "ProfileError",
+    "ProviderProfileError",
     "resolve_profiles",
     "resolve_route_models",
     "resolve_wire_reasoning",
