@@ -16,6 +16,7 @@ the loop replaceable: mount a different implementation, call
 """
 
 from .agent import (
+    AGENT_LOOP_SETTINGS,
     DEFAULT_MAX_PARALLEL_TOOL_CALLS,
     DEFAULT_MAX_STEPS,
     PRE_STEP,
@@ -47,4 +48,5 @@ __all__ = [
     "REQUEST_ERROR",
     "STATUS",
     "SESSION_START",
+    "AGENT_LOOP_SETTINGS",
 ]

@@ -37,6 +37,13 @@ def emit_contained(ctx: Any, name: str, *args: Any) -> list[BaseException]:
     # when there is none. So we walk the hook list ourselves. This is the ONE
     # place that reaches into the kernel's internals; if plugkit grows a
     # contained mode, only this function body changes.
+    if ctx is None:
+        # A Session rebuilt by a persistence backend has no context to
+        # broadcast on. That is a valid state, not a listener failure, so it
+        # is silent — logging it would fill a cold read's output with warnings
+        # about something working as designed.
+        return []
+
     events = getattr(ctx, "events", None)
     registry = getattr(events, "_hooks", None) if events is not None else None
     if registry is None:

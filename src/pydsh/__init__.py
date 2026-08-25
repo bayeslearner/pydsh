@@ -77,6 +77,14 @@ from .message import (
     decode_payload,
     encode_payload,
 )
+from .operating import (
+    AnonymousUserId,
+    CommandInvocation,
+    CommandResult,
+    Commands,
+    Credentials,
+    Settings,
+)
 from .storage import (
     Domain,
     DomainSpec,
@@ -90,6 +98,7 @@ from .storage import (
 )
 from .session import (
     CheckpointPolicy,
+    ProjectionCache,
     ProjectionDefinition,
     Session,
     SessionEvent,
@@ -132,6 +141,14 @@ __all__ = [
     "ProjectionDefinition",
     "SessionStats",
     "CheckpointPolicy",
+    # operating core
+    "Settings",
+    "Credentials",
+    "Commands",
+    "CommandInvocation",
+    "CommandResult",
+    "AnonymousUserId",
+    "ProjectionCache",
     # storage seam
     "Storage",
     "JsonStorage",

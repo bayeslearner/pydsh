@@ -39,6 +39,16 @@ class SessionStore(Service):
     def has_persistence(self) -> bool:
         return self._persistence is not None
 
+    @property
+    def persistence(self) -> Any:
+        """The attached backend, or ``None``.
+
+        Public because the cold-read path needs the backend directly — it reads
+        a *tail* of a log rather than a whole session, which is not something
+        the store itself does.
+        """
+        return self._persistence
+
     async def flush(self, session: Session) -> None:
         """Await the durability checkpoint for one session.
 

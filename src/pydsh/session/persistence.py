@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from .events import SESSION_FORMAT_VERSION
-from .session import Session, SessionEvent, SessionError
+from .session import Session, SessionEvent, SessionError, SessionHeader
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS sessions (
@@ -70,6 +70,16 @@ class SessionPersistence(ABC):
     async def flush(self, session: Session) -> None:  # pragma: no cover - ABC
         raise NotImplementedError
 
+    async def read_from(self, id: str, from_seq: int) -> Optional[dict]:  # pragma: no cover - ABC
+        """The header plus the events at or after ``from_seq``.
+
+        The cold-read path: a consumer that already holds folded state needs
+        only the tail since that state's watermark, not the whole log. Returns
+        ``None`` when the session was never persisted, so "no such session" is
+        distinguishable from "a session with no events left to read".
+        """
+        raise NotImplementedError
+
     async def load(self, id: str) -> Optional[Session]:  # pragma: no cover - ABC
         raise NotImplementedError
 
@@ -98,9 +108,13 @@ class SqliteSessionPersistence(SessionPersistence):
 
     # -- Session.to_json round-trips through SQL as JSON text ------------
 
-    def _write(self, session: Session) -> None:
+    def _write(self, session: Session) -> int:
         payload = session.to_json()
         header = payload["header"]
+        events = payload["events"]
+        # Captured from the snapshot being written, for the same reason
+        # `_write_unsaved` does: `session.seq` may have moved on since.
+        written = events[-1]["seq"] if events else 0
         with self._conn:
             self._conn.execute(
                 "INSERT OR REPLACE INTO sessions"
@@ -128,8 +142,9 @@ class SqliteSessionPersistence(SessionPersistence):
                         json.dumps(e.get("source_event_seqs", [])),
                     ),
                 )
+        return written
 
-    def _write_unsaved(self, session: Session) -> None:
+    def _write_unsaved(self, session: Session) -> int:
         """Append only the events that have not been persisted yet.
 
         Ensures the header row exists first: a store ``create`` does not
@@ -143,6 +158,13 @@ class SqliteSessionPersistence(SessionPersistence):
         """
         from_seq = self._persisted_seq.get(id(session), 0)
         fresh = [e for e in session.events if e.seq > from_seq]
+        # The watermark is what this call actually wrote, and it is captured
+        # HERE rather than read back from `session.seq` afterwards. The session
+        # is live: events can be appended while this runs, and recording the
+        # session's current tail would mark those as persisted without ever
+        # writing them — the next incremental flush would then skip them, and
+        # they would be lost with no error anywhere.
+        written = fresh[-1].seq if fresh else from_seq
         with self._conn:
             self._conn.execute(
                 "INSERT OR REPLACE INTO sessions"
@@ -170,6 +192,48 @@ class SqliteSessionPersistence(SessionPersistence):
                         json.dumps(list(e.source_event_seqs)),
                     ),
                 )
+        return written
+
+    def _read_header(self, id: str) -> Optional[SessionHeader]:
+        """The stored header alone — the identity witness a cold read checks."""
+        row = self._conn.execute(
+            "SELECT version, created_at, cwd, request FROM sessions WHERE id = ?",
+            (id,),
+        ).fetchone()
+        if row is None:
+            return None
+        version, created_at, cwd, request = row
+        if version != SESSION_FORMAT_VERSION:
+            raise SessionFormatUnsupportedError(
+                f"session {id!r} has format version {version}, expected "
+                f"{SESSION_FORMAT_VERSION}; refusing to load (no migration)"
+            )
+        return SessionHeader(
+            version=version,
+            id=id,
+            created_at=created_at,
+            cwd=cwd,
+            request=json.loads(request) if request else None,
+        )
+
+    def _read_events_from(self, id: str, from_seq: int) -> list[SessionEvent]:
+        """The events at or after ``from_seq``, in order."""
+        rows = self._conn.execute(
+            "SELECT type, seq, time, data, surface_op, source_event_seqs"
+            " FROM events WHERE session_id = ? AND seq >= ? ORDER BY seq",
+            (id, from_seq),
+        ).fetchall()
+        return [
+            SessionEvent(
+                type=r[0],
+                seq=r[1],
+                time=r[2],
+                data=json.loads(r[3]),
+                surface_op=r[4],
+                source_event_seqs=tuple(json.loads(r[5]) if r[5] else []),
+            )
+            for r in rows
+        ]
 
     def _read(self, id: str) -> Optional[dict]:
         row = self._conn.execute(
@@ -211,15 +275,20 @@ class SqliteSessionPersistence(SessionPersistence):
 
     async def create(self, session: Session) -> None:
         async with self._lock:
-            await asyncio.to_thread(self._write, session)
-            self._persisted_seq[id(session)] = session.seq
+            written = await asyncio.to_thread(self._write, session)
+            self._persisted_seq[id(session)] = written
 
     async def flush(self, session: Session) -> None:
-        # Track the persisted tail so an incremental flush appends only the
-        # events that landed since the last checkpoint.
+        """Write everything appended since the last checkpoint.
+
+        The watermark comes from what the write actually covered, never from
+        the session's tail at the moment the write finished — the session is
+        live, and anything appended during the write would otherwise be marked
+        persisted without being written.
+        """
         async with self._lock:
-            await asyncio.to_thread(self._write_unsaved, session)
-            self._persisted_seq[id(session)] = session.seq
+            written = await asyncio.to_thread(self._write_unsaved, session)
+            self._persisted_seq[id(session)] = written
 
     async def load(self, id: str) -> Optional[Session]:
         payload = await asyncio.to_thread(self._read, id)
@@ -236,6 +305,13 @@ class SqliteSessionPersistence(SessionPersistence):
             "events": payload["events"],
         }
         return Session.from_json(None, snapshot)  # type: ignore[arg-type]
+
+    async def read_from(self, id: str, from_seq: int) -> Optional[dict]:
+        header = await asyncio.to_thread(self._read_header, id)
+        if header is None:
+            return None
+        events = await asyncio.to_thread(self._read_events_from, id, from_seq)
+        return {"meta": header, "events": events}
 
     async def list(self) -> list[str]:
         rows = await asyncio.to_thread(

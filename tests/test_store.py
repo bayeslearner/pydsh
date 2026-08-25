@@ -14,6 +14,7 @@ import pytest
 from plugkit import Context
 
 from pydsh.session import (
+    Session,
     SessionError,
     SessionFormatUnsupportedError,
     SessionStore,
@@ -149,3 +150,38 @@ async def test_failing_observer_cannot_break_a_committed_append():
     assert event.seq == 1
     assert session.events[0] is event
     assert seen == [1]  # the later observer still ran
+
+
+async def test_a_flush_only_marks_what_it_actually_wrote(tmp_path):
+    """A live session can grow *during* a flush, and the watermark must not
+    claim those events.
+
+    Recording `session.seq` after the write marks everything appended in the
+    meantime as persisted. The next incremental flush then skips them and they
+    are lost — silently, because nothing in the path errors. Found by the
+    projection cache, whose forced checkpoints flush concurrently with appends.
+    """
+    class _Ctx:
+        def emit(self, *args, **kwargs):
+            pass
+
+    backend = SqliteSessionPersistence(str(tmp_path / "race.db"))
+    session = Session(_Ctx(), id="s1")
+    session.append("turn/start", {"turn": 1})
+
+    original = backend._write_unsaved
+
+    def append_during_the_write(target):
+        # Simulates an append landing while the write is off on its thread.
+        written = original(target)
+        target.append("turn/start", {"turn": 2})
+        return written
+
+    backend._write_unsaved = append_during_the_write
+    await backend.flush(session)
+
+    backend._write_unsaved = original
+    await backend.flush(session)
+
+    tail = await backend.read_from("s1", 1)
+    assert [e.seq for e in tail["events"]] == [1, 2]

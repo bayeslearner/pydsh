@@ -59,6 +59,11 @@ DEFAULT_MAX_STEPS = 32
 #: safe default: tools that touch a shared working directory are common.
 DEFAULT_MAX_PARALLEL_TOOL_CALLS = 1
 
+#: The settings section the loop reads its live tunables from. Registered by
+#: the loop when `ctx.settings` is mounted; read at the moment of use, so a
+#: change takes effect on the next step rather than the next agent.
+AGENT_LOOP_SETTINGS = "agent-loop"
+
 #: Dispatch names. Named here so a plugin author can import them instead of
 #: retyping a string that will not fail loudly when it is wrong.
 PRE_STEP = "agent/pre-step"
@@ -480,7 +485,7 @@ class Agent:
         same conversation reads the same way every time. Returns the result
         messages, which are the next step's input.
         """
-        gate = asyncio.Semaphore(max(1, self.options.max_parallel_tool_calls))
+        gate = asyncio.Semaphore(self._parallel_limit())
 
         async def run_one(call: ToolCallBlock) -> _ToolOutcome:
             async with gate:
@@ -521,6 +526,20 @@ class Agent:
             )
             results.append(result_message)
         return results
+
+    def _parallel_limit(self) -> int:
+        """How many tool calls may run at once, right now.
+
+        Read per step rather than captured at construction: with `ctx.settings`
+        mounted the limit is a live tunable, and an operator lowering it should
+        affect the next step, not only agents built afterwards.
+        """
+        settings = getattr(self._root, "settings", None)
+        if settings is not None and settings.has(AGENT_LOOP_SETTINGS):
+            live = settings.get(AGENT_LOOP_SETTINGS).get("max_parallel_tool_calls")
+            if live:
+                return max(1, int(live))
+        return max(1, self.options.max_parallel_tool_calls)
 
     async def _execute_one(self, call: ToolCallBlock, signal: CancelSignal) -> _ToolOutcome:
         """Run one tool call. Never raises — a failure is a result (I3)."""
@@ -593,4 +612,5 @@ __all__ = [
     "REQUEST_ERROR",
     "STATUS",
     "SESSION_START",
+    "AGENT_LOOP_SETTINGS",
 ]

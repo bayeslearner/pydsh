@@ -128,6 +128,16 @@ uv run pytest tests  # the suite
   reads from memory, one write chain per domain, and a change event. Writes go
   durable first, memory second, event third, so the read path is never ahead of
   what is on disk.
+- **The operating core** (`pydsh.operating`): `ctx.settings` (namespaced,
+  validated, changeable while the process runs — the agent loop reads its
+  parallel-tool limit through it), `ctx.credentials` (a name in config, the
+  secret resolved per call and never returned by `describe`), `ctx.commands`
+  (slash-commands that run without a model turn and never raise at the person
+  who typed them), and `ctx.anonymous_user_id`.
+- **The projection cache** (`ctx.projection_cache`): checkpoint rows persisted
+  through the storage seam, so listing archived conversations with their stats
+  is a table read rather than a hundred log folds. It may lag the log; it never
+  leads it.
 - **Cancellation** (`pydsh.cancel`): `AbortSignal` semantics, with two scopes
   per agent. `cancel()` stops the work in flight and leaves the agent usable;
   only a lifetime abort — the caller tearing down, or the loop being unmounted

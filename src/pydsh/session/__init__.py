@@ -14,6 +14,7 @@ typed ``Message``/ContentBlock vocabulary arrives with the llm seam. The
 compaction sprint.
 """
 
+from .cache import CACHE_DOMAIN, ProjectionCache
 from .checkpoint import DEFAULT_EVERY_TURNS, CheckpointPolicy
 from .events import (
     EVENT_DATA_FIELDS,
@@ -67,6 +68,8 @@ __all__ = [
     "EMPTY_WATERMARK",
     "FIRST_SEQ",
     # durability
+    "ProjectionCache",
+    "CACHE_DOMAIN",
     "CheckpointPolicy",
     "DEFAULT_EVERY_TURNS",
     # vocabulary
