@@ -39,6 +39,13 @@ EVENT_TYPES = (
     "tool/call",
     # tool/result — a completed tool call's model-facing result
     "tool/result",
+    # compaction/{start,summary,end} — the lifecycle of one compaction.
+    # Log-only: the summary reaches the model as an ordinary user/message whose
+    # surface_op shadows what it replaced, so nothing downstream has to learn
+    # what compaction is.
+    "compaction/start",
+    "compaction/summary",
+    "compaction/end",
     # agent/inbox/spliced — one change to the agent's pending-input queues.
     # Log-only, and the reason the inbox survives a restart: the queues are a
     # projection of these events, never state that lives only in memory.
@@ -62,4 +69,15 @@ EVENT_DATA_FIELDS: dict[str, tuple[str, ...]] = {
     "tool/call": ("turn", "step", "callId", "name", "arguments"),
     "tool/result": ("turn", "step", "message", "error", "meta"),
     "agent/inbox/spliced": ("target", "start", "inserted", "removedCount", "outcome"),
+    "compaction/start": ("compaction_id", "region", "source_command_id"),
+    "compaction/summary": (
+        "compaction_id",
+        "summary",
+        "shadowed_range",
+        "shadowed_seqs",
+        "shadowed_tokens",
+        "provider",
+        "model",
+    ),
+    "compaction/end": ("compaction_id", "error"),
 }

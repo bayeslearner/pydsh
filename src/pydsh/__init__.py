@@ -77,6 +77,12 @@ from .message import (
     decode_payload,
     encode_payload,
 )
+from .compaction import (
+    BasicCompaction,
+    CompactionEngine,
+    CompactionRefused,
+    CompactionResult,
+)
 from .bounded import (
     ItemRetainer,
     LocalSpillStore,
@@ -159,6 +165,11 @@ __all__ = [
     "ProjectionDefinition",
     "SessionStats",
     "CheckpointPolicy",
+    # compaction
+    "CompactionEngine",
+    "CompactionResult",
+    "CompactionRefused",
+    "BasicCompaction",
     # bounded output
     "ItemRetainer",
     "TextRetainer",

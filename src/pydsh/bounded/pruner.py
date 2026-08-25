@@ -17,6 +17,7 @@ raises.
 
 from __future__ import annotations
 
+from dataclasses import replace
 from typing import Any, Optional
 
 from plugkit import Service
@@ -148,6 +149,80 @@ class ToolResultPruner(Service):
                 "a prune must shrink and must fit"
             )
         return pruned
+
+
+    def prune_session(self, session: Any) -> dict:
+        """Prune every over-budget tool result on the current surface.
+
+        Each replacement shadows exactly the node it replaces — one for one, so
+        the surface keeps its shape and only the content shrinks.
+
+        The budget applies to the text **inside** each ``ToolResultBlock``, not
+        to the message's top-level content. A tool result's message holds one
+        result block, and that block holds the text; measuring the outer level
+        finds no text blocks at all, reports zero, and prunes nothing — silently,
+        on every real tool result.
+
+        Candidates are fixed **before** the first write. The walk would
+        otherwise be reading a surface its own replacements are changing, which
+        is a bug waiting for its second test case.
+        """
+        from ..message.blocks import ToolResultBlock
+        from ..message.payload import decode_payload, encode_payload
+
+        by_seq = {event.seq: event for event in session.events}
+        candidates: list[tuple[int, Any, Any]] = []
+        for seq in session.surface_nodes:
+            event = by_seq.get(seq)
+            if event is None or event.type != "tool/result":
+                continue
+            message = decode_payload(event.data.get("message"))
+            if self._result_chars(message) > self.config["threshold_chars"]:
+                candidates.append((seq, event, message))
+
+        pruned_seqs: list[int] = []
+        chars_removed = 0
+        for seq, event, message in candidates:
+            before = self._result_chars(message)
+            content = tuple(self._prune_block(block) for block in message.content)
+            replacement = replace(message, content=content)
+            after = self._result_chars(replacement)
+            if after >= before:
+                continue
+
+            session.append(
+                "tool/result",
+                {**event.data, "message": encode_payload(replacement)},
+                surface_op={"op": "replace", "start": seq, "end": seq},
+                source_event_seqs=(seq,),
+            )
+            pruned_seqs.append(seq)
+            chars_removed += before - after
+
+        return {"pruned": pruned_seqs, "chars_removed": chars_removed}
+
+    def _result_chars(self, message: Any) -> int:
+        """Characters in a tool-result message, counting inside result blocks."""
+        from ..message.blocks import ToolResultBlock
+
+        total = 0
+        for block in getattr(message, "content", ()) or ():
+            if isinstance(block, ToolResultBlock):
+                total += self.measure_content(list(block.content))
+            else:
+                total += self.measure_content([block])
+        return total
+
+    def _prune_block(self, block: Any) -> Any:
+        """Prune inside a result block; leave anything else alone."""
+        from ..message.blocks import ToolResultBlock
+
+        if not isinstance(block, ToolResultBlock):
+            return block
+        pruned = self.prune_content(list(block.content))
+        if pruned is None:
+            return block
+        return replace(block, content=tuple(pruned))
 
 
 __all__ = [

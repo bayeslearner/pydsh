@@ -24,6 +24,7 @@ from .events import (
     SURFACE_EVENTS,
     TURN_EVENTS,
 )
+from .pairing import balanced_after, balanced_before, surface_balance
 from .projection import (
     EMPTY_WATERMARK,
     FIRST_SEQ,
@@ -67,6 +68,10 @@ __all__ = [
     "SESSION_STATS_KEY",
     "EMPTY_WATERMARK",
     "FIRST_SEQ",
+    # surface pairing
+    "surface_balance",
+    "balanced_before",
+    "balanced_after",
     # durability
     "ProjectionCache",
     "CACHE_DOMAIN",

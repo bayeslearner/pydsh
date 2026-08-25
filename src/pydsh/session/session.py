@@ -119,17 +119,51 @@ class Session:
         self.ctx = ctx
         self.id = id
         self.header = header or SessionHeader(id=id)
-        self._events: list[SessionEvent] = list(seed_events)
-        self._seq = max((e.seq for e in self._events), default=0)
+        self._events: list[SessionEvent] = []
+        self._seq = 0
         # Ordered seqs of surface events — the model-visible projection.
-        self._surface_nodes: list[int] = [
-            e.seq for e in self._events if e.type in SURFACE_EVENTS
-        ]
+        self._surface_nodes: list[int] = []
+        # Bumped on every replacement, so anything caching a view of the
+        # surface has an exact, cheap staleness signal.
+        self._replace_generation = 0
+        # Provenance: which node replaced which. Kept for the life of the
+        # session, so "what did this summary shadow" stays answerable.
+        self._replacements: list[dict] = []
+        for event in seed_events:
+            self._seed(event)
+
+    def _seed(self, event: SessionEvent) -> None:
+        """Replay one stored event into the log and the surface.
+
+        The surface is a *fold over the log's operations*, and it always was —
+        filtering by event type happened to give the same answer while `append`
+        was the only operation. Once a replacement exists, filtering resurrects
+        exactly what compaction shadowed, and nothing reports it.
+        """
+        self._events.append(event)
+        self._seq = max(self._seq, event.seq)
+        operation = event.surface_op
+        if isinstance(operation, dict) and operation.get("op") == "replace":
+            self._apply_surface_replace(
+                operation["start"], operation["end"], event.seq
+            )
+        elif event.type in SURFACE_EVENTS:
+            self._surface_nodes.append(event.seq)
 
     @property
     def seq(self) -> int:
-        """The sequence number the next append will take (current tail)."""
+        """The sequence number of the last committed event."""
         return self._seq
+
+    @property
+    def replace_generation(self) -> int:
+        """How many surface replacements have happened. A staleness signal."""
+        return self._replace_generation
+
+    @property
+    def replacements(self) -> list[dict]:
+        """Each replacement: the node that arrived and the nodes it shadowed."""
+        return [dict(r) for r in self._replacements]
 
     @property
     def events(self) -> tuple[SessionEvent, ...]:
@@ -155,6 +189,12 @@ class Session:
         state changes, then records the event, adds surface events to the
         projection, and broadcasts ``session/event`` through the owning store.
         """
+        replacing = isinstance(surface_op, dict) and surface_op.get("op") == "replace"
+        if replacing and event_type not in SURFACE_EVENTS:
+            raise SessionError(
+                f"{event_type!r} cannot replace surface nodes: only surface events "
+                f"({', '.join(SURFACE_EVENTS)}) have a place in the projection"
+            )
         if event_type not in EVENT_DATA_FIELDS:
             raise UnknownEventType(
                 f"unknown session event type {event_type!r}; "
@@ -172,12 +212,54 @@ class Session:
             source_event_seqs=source_event_seqs,
         )
         self._events.append(event)
-        if event_type in SURFACE_EVENTS:
+        if replacing:
+            self._apply_surface_replace(
+                surface_op["start"], surface_op["end"], event.seq
+            )
+        elif event_type in SURFACE_EVENTS:
             self._surface_nodes.append(event.seq)
         # Post-commit: the event is already in the log, so a throwing
         # observer must not turn a committed append into an exception.
         emit_contained(self.ctx, "session/event", self, event)
         return event
+
+    def _apply_surface_replace(self, start: int, end: int, new_seq: int) -> None:
+        """Swap the run of surface nodes from ``start`` to ``end`` for one node.
+
+        ``start`` and ``end`` name the first and last *nodes* of a contiguous
+        run, and the run is taken **positionally** — by where those nodes sit on
+        the surface, not by comparing sequence numbers.
+
+        That distinction only matters after the first replacement, which is
+        exactly why it is easy to miss. A replacement puts a high sequence
+        number where a low range used to be, so the surface stops being
+        ordered by sequence: `[7, 4, 5, 6]` is a perfectly ordinary surface. A
+        `start <= seq <= end` test then selects the wrong nodes or none at all,
+        and compaction works precisely once per session.
+
+        The swap is a single slice assignment, so the surface is never
+        momentarily missing both the run and its replacement (I4).
+        """
+        nodes = self._surface_nodes
+        try:
+            first = nodes.index(start)
+            last = nodes.index(end)
+        except ValueError:
+            raise SessionError(
+                f"surface replace: node {start if start not in nodes else end} is "
+                f"not on the surface; the surface holds {nodes}"
+            ) from None
+        if last < first:
+            raise SessionError(
+                f"surface replace: node {end} precedes {start} on the surface, so "
+                f"[{start}, {end}] is not a run; the surface holds {nodes}"
+            )
+        shadowed = nodes[first : last + 1]
+        self._surface_nodes[first : last + 1] = [new_seq]
+        self._replace_generation += 1
+        self._replacements.append(
+            {"new_seq": new_seq, "shadowed_seqs": list(shadowed)}
+        )
 
     def derive_event_message(self, event: SessionEvent) -> Any:
         """Project one surface event to its model-visible message, else None."""
@@ -188,13 +270,24 @@ class Session:
         return None
 
     def derive_messages(self) -> list[Any]:
-        """The ordered model-visible messages, derived from surface events."""
+        """The ordered model-visible messages, following the current surface.
+
+        Driven by ``surface_nodes`` rather than by scanning for surface event
+        types: after a compaction the two disagree, and the surface is the one
+        that is right.
+        """
+        by_seq = {event.seq: event for event in self._events}
         messages: list[Any] = []
-        for event in self._events:
-            if event.type in SURFACE_EVENTS:
-                message = self.derive_event_message(event)
-                if message is not None:
-                    messages.append(message)
+        for seq in self._surface_nodes:
+            event = by_seq.get(seq)
+            if event is None:
+                raise SessionError(
+                    f"surface node {seq} has no matching log event; the surface "
+                    "is corrupt"
+                )
+            message = self.derive_event_message(event)
+            if message is not None:
+                messages.append(message)
         return messages
 
     # -- serialization used by the persistence backend --------------------

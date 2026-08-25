@@ -149,6 +149,11 @@ uv run pytest tests  # the suite
   a spill store that puts oversized output where the model can read it back,
   and a deterministic pruner that cuts the middle out of an over-budget result.
   Everything that drops data says how much.
+- **Compaction** (`pydsh.compaction`, `ctx.compaction`): replacing a stretch of
+  history with a summary of it. The log stays append-only — one new event
+  declares it shadows a range of the *surface*, and every original stays
+  readable at its original sequence. A region may only be replaced if both its
+  edges are balanced cuts, so a tool call is never separated from its result.
 - **Cancellation** (`pydsh.cancel`): `AbortSignal` semantics, with two scopes
   per agent. `cancel()` stops the work in flight and leaves the agent usable;
   only a lifetime abort — the caller tearing down, or the loop being unmounted
