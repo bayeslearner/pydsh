@@ -228,13 +228,21 @@ uv run pytest tests  # the suite
   build cannot serve is refused **at mount**, with the supported set named — a
   narrow table that fails loudly beats a broad one that fails at the first
   request in production.
+- **MCP** (`pydsh.mcp`, `ctx.mcp`): another process's tools, on our pipeline.
+  A server's tools are registered on `ctx.tools` under `mcp__<server>__<tool>`,
+  so guards, approvers and the spill policy apply without any of them knowing
+  where the tool runs — the model sees one flat list. Names are derived so two
+  distinct `(server, tool)` pairs can never collapse into one, a sync is all or
+  nothing (and a failed one restores the previous generation rather than
+  leaving the model with none of that server's tools), and each connection is
+  supervised: bounded backoff, then giving up and taking the tools away rather
+  than offering what cannot run.
 - **Cancellation** (`pydsh.cancel`): `AbortSignal` semantics, with two scopes
   per agent. `cancel()` stops the work in flight and leaves the agent usable;
   only a lifetime abort — the caller tearing down, or the loop being unmounted
   — ends it.
 
-Still to come: `pi_ai` and `mcp_client`, then the app layer (SDK, gateway,
-CLI). Everything else in
+Still to come: the app layer (SDK, gateway, CLI). Everything else in
 [`docs/design/service-catalogue.md`](docs/design/service-catalogue.md) is
 ported.
 

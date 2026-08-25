@@ -127,7 +127,7 @@ prompt. A port that skips them loses the proof that the injection seam works.
 | `spill_policy` | core (plugin) | post-execute enrichment |
 | `shell` | core | subprocess execution seam |
 | `terminal` | core | persistent shell sessions |
-| `mcp_client` (plugin) | core | MCP bridge plugin (tools registered as `mcp__server__tool`) |
+| `mcp_client` (plugin) | core | MCP bridge plugin (tools registered as `mcp__server__tool`). Disposal goes through plugkit's returned disposer rather than the reference's reach into `ctx.tools._tools`; the child's environment scrub is the **base** rather than an overlay over a full copy, which is what makes it remove anything; and a failed sync restores the previous generation |
 
 ### Operating / domain services
 

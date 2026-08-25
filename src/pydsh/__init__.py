@@ -40,6 +40,7 @@ from .agent import (
 )
 from .cancel import CancelledError, CancelSignal
 from .console import CompactCommand, FeedbackCommand, GoalCommand, record_feedback
+from .mcp import McpClient, McpClientPlugin, McpError, public_tool_name
 from .plan import PlanMode, PlanModeError, fold_plan_mode
 from .dispatch import emit_contained
 from .llm import (
@@ -337,6 +338,11 @@ __all__ = [
     "GoalCommand",
     "FeedbackCommand",
     "record_feedback",
+    # MCP
+    "McpClientPlugin",
+    "McpClient",
+    "McpError",
+    "public_tool_name",
     # cancellation
     "CancelSignal",
     "CancelledError",
