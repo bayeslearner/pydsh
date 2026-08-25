@@ -52,6 +52,8 @@ EVENT_TYPES = (
     # goal/change — one full-value change to the session's objective. Log-only
     # and self-describing: each carries the whole goal, never a delta.
     "goal/change",
+    # schedule/change — one durable reminder created, deleted, or fired.
+    "schedule/change",
     # agent/inbox/spliced — one change to the agent's pending-input queues.
     # Log-only, and the reason the inbox survives a restart: the queues are a
     # projection of these events, never state that lives only in memory.
@@ -88,4 +90,5 @@ EVENT_DATA_FIELDS: dict[str, tuple[str, ...]] = {
     "compaction/end": ("compaction_id", "error"),
     "todo/write": ("items",),
     "goal/change": ("version", "operation", "goal", "cleared", "cleared_at"),
+    "schedule/change": ("version", "operation", "record", "id", "fired_at", "next_at"),
 }

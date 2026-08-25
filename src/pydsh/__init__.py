@@ -77,6 +77,13 @@ from .message import (
     decode_payload,
     encode_payload,
 )
+from .governance import (
+    HooksProtocol,
+    InvariantRegistry,
+    ScheduleError,
+    ScheduleRuntime,
+    merge_hook_outputs,
+)
 from .query import (
     QueryError,
     SessionQueryEngine,
@@ -189,6 +196,12 @@ __all__ = [
     "ProjectionDefinition",
     "SessionStats",
     "CheckpointPolicy",
+    # governance
+    "ScheduleRuntime",
+    "ScheduleError",
+    "HooksProtocol",
+    "merge_hook_outputs",
+    "InvariantRegistry",
     # reading history
     "SessionQueryEngine",
     "SessionReferences",

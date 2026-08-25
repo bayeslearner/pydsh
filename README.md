@@ -172,6 +172,12 @@ uv run pytest tests  # the suite
   over a wire, and text search is literal. `ctx.session_references` gives
   canonical URIs and Markdown mentions for pointing one session at another,
   with a bounded projection so a reference is not a paste.
+- **Schedules, hooks and invariants** (`pydsh.governance`): `ctx.schedules`
+  holds durable reminders folded from the session log, with the timer as a
+  projection that re-checks the log on every wake-up so nothing fires early;
+  `ctx.hooks` runs a deployment's own commands at points in the loop and merges
+  their answers conservatively — any block wins; `ctx.invariants` makes a
+  violated assumption loud rather than mysterious.
 - **Cancellation** (`pydsh.cancel`): `AbortSignal` semantics, with two scopes
   per agent. `cancel()` stops the work in flight and leaves the agent usable;
   only a lifetime abort — the caller tearing down, or the loop being unmounted
