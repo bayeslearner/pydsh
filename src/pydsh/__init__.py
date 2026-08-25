@@ -36,8 +36,11 @@ from .agent import (
     AgentRegistry,
     BlockAssembler,
     Inbox,
+    SubagentTool,
 )
 from .cancel import CancelledError, CancelSignal
+from .console import CompactCommand, FeedbackCommand, GoalCommand, record_feedback
+from .plan import PlanMode, PlanModeError, fold_plan_mode
 from .dispatch import emit_contained
 from .llm import (
     AdapterRegistration,
@@ -312,6 +315,15 @@ __all__ = [
     "AgentOptions",
     "Inbox",
     "BlockAssembler",
+    "SubagentTool",
+    # plan mode and the console commands
+    "PlanMode",
+    "PlanModeError",
+    "fold_plan_mode",
+    "CompactCommand",
+    "GoalCommand",
+    "FeedbackCommand",
+    "record_feedback",
     # cancellation
     "CancelSignal",
     "CancelledError",

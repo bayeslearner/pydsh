@@ -58,6 +58,15 @@ EVENT_TYPES = (
     # Log-only, and the reason the inbox survives a restart: the queues are a
     # projection of these events, never state that lives only in memory.
     "agent/inbox/spliced",
+    # plan/mode — the session entered or left plan mode. Log-only, last one
+    # wins. Recorded rather than held in memory so a resumed or forked session
+    # is in plan mode because its log says so, with nothing to rebuild.
+    "plan/mode",
+    # feedback/record — a person's feedback about this conversation. Log-only,
+    # and emphatically so: feedback about a conversation must not become part
+    # of it, or the model reads the verdict on its last answer as input to the
+    # next one.
+    "feedback/record",
 )
 
 # The payload shape of each event type, as the type key -> field names.
@@ -91,4 +100,6 @@ EVENT_DATA_FIELDS: dict[str, tuple[str, ...]] = {
     "todo/write": ("items",),
     "goal/change": ("version", "operation", "goal", "cleared", "cleared_at"),
     "schedule/change": ("version", "operation", "record", "id", "fired_at", "next_at"),
+    "plan/mode": ("active",),
+    "feedback/record": ("text",),
 }

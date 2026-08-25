@@ -66,8 +66,8 @@ adapters are **provider-domain**, and application-shaped concepts are
 | `agent` (ctx.agents) | core | registry + pluggable loop factory |
 | `agent` Agent (1:1 session, insert/run/cancel/when_idle) | core | the loop driver |
 | `inbox` (ctx-free per-agent) | core | two queues + splice events (replayable) |
-| `plan_mode` | core | last-wins `plan/mode` fold |
-| `subagent` (tool plugin) | **provider-domain?** | subagent *tool* is a consumer-facing plugin; the *mechanism* (child session + create_agent) is core |
+| `plan_mode` | core | last-wins `plan/mode` fold, plus a pending intent held to the next turn boundary. The pending value is deliberately **not** rendered into the prompt section — the reference does, which applies a queued flip mid-turn while still reporting it as queued |
+| `subagent` (tool plugin) | plugin | the tool ships here as a default plugin; the *mechanism* it uses (a child session + `create_agent`) is core and already was |
 | `system_prompt` (ctx.systemPrompt) | core | sections/contexts/tools/variables + assemble waterfall |
 
 ### Tools seam
@@ -95,7 +95,7 @@ plugin that provides the same contribution.
 | `tool_todo` | plugin | `tools` |
 | `tool_goal` | plugin | `tools` + `goal` |
 | `tool_jobs` | plugin | `tools` + `jobs` |
-| `subagent` | plugin | `agent` (child session + create_agent) |
+| `subagent` | plugin | `agent` (child session + create_agent). Depth is carried on the calling agent, not counted in a shared integer — the reference's counter measures concurrency, so parallel siblings exhaust it |
 | `guard_repeat_tool` | plugin | `tools/post-execute` |
 | `guard_timeout` | plugin | `tools/execute` |
 | `spill_policy` | plugin | `spill` + `tools/post-execute` |
@@ -104,8 +104,8 @@ plugin that provides the same contribution.
 | `time_context` | plugin | `agent/pre-step` context injection |
 | `system_instructions` | plugin | `agent/pre-step` context injection |
 | `command_goal` | plugin | `commands` + `goal` |
-| `command_feedback` | plugin | `commands` + `message_feedback` |
-| `command_compact` | plugin | `commands` + `compaction` |
+| `command_feedback` | plugin | `commands` + the session log. **Not** `message_feedback`: this records a log-only `feedback/record` event about the whole session, where `message_feedback` is a sidecar rating on one message |
+| `command_compact` | plugin | `commands` + `compaction`, routing refusals by `CompactionRefused.code` |
 
 The two `*_context`/`instructions` plugins matter more than their size suggests:
 they are the reference's demonstration that context reaches the model as
@@ -116,9 +116,10 @@ prompt. A port that skips them loses the proof that the injection seam works.
 
 | Service | Class | Status / note |
 |---|---|---|
-| `storage` (ctx.storage hub) | defer | only deferred because spec 01 uses a specific SQLite table (the log is the only store today); the hub arrives when a second store appears |
+| `storage` (ctx.storage hub) | core | the deferral ended when the second store arrived, as planned. The session log keeps its bespoke SQLite table; everything since goes through the hub |
 | `storage_domain` (ctx.storageDomain) | core | schema-validated KV domains + change events |
-| `storage_json` / `storage_kv` / `storage_sqlite` | core | the three backends, kept behind the hub |
+| `storage_json` / `storage_sqlite` | core | two interchangeable media, kept behind the hub |
+| `storage_kv` | core, **covered by `storage_json`** | the reference's `KvTable` is a JSON file with an atomic replace and a detached in-memory copy — which is exactly `JsonBackend`/`JsonKvUnit` behind the hub. Porting it separately would be a second implementation of one medium |
 | `fs` (web/read/edit) | **plugkit?** no → core | zero-dep path/text service; or map to reference `fs` seam |
 | `atomic_write` (util) | core | tiny util |
 | `spill` / `spill_local` (ctx.spillStore) | core | huge-tool-text retention + locator |

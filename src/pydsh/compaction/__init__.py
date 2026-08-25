@@ -18,12 +18,18 @@ from .basic import (
     SUMMARY_INSTRUCTION,
     BasicCompaction,
 )
-from .engine import CompactionEngine, CompactionRefused, CompactionResult
+from .engine import (
+    REFUSAL_CODES,
+    CompactionEngine,
+    CompactionRefused,
+    CompactionResult,
+)
 
 __all__ = [
     "CompactionEngine",
     "CompactionResult",
     "CompactionRefused",
+    "REFUSAL_CODES",
     "BasicCompaction",
     "DEFAULT_THRESHOLD_TOKENS",
     "DEFAULT_KEEP_RECENT_NODES",

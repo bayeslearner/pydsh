@@ -19,8 +19,22 @@ from typing import Any, Optional
 from plugkit import Service
 
 
+#: Why a compaction was refused. A caller reporting a refusal to a person needs
+#: to route on something stable, and the message is not that — it names
+#: sequence numbers and is written to be read, not matched.
+REFUSAL_CODES = ("empty", "inverted", "unbalanced", "changed", "commit", "refused")
+
+
 class CompactionRefused(RuntimeError):
-    """A region cannot be compacted, and the surface is untouched."""
+    """A region cannot be compacted, and the surface is untouched.
+
+    :param code: one of :data:`REFUSAL_CODES`, defaulting to ``"refused"`` so
+        an implementation that raises without one still says something true.
+    """
+
+    def __init__(self, message: str, code: str = "refused") -> None:
+        super().__init__(message)
+        self.code = code
 
 
 @dataclass(frozen=True)

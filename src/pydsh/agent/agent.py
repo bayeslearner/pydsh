@@ -185,6 +185,18 @@ class Agent:
         if self._activity is not None:
             self._activity.abort(cause)
 
+    @property
+    def activity(self) -> Optional[CancelSignal]:
+        """The signal scoping the work in flight, or ``None`` when idle.
+
+        Read by anything that starts work *on behalf of* this turn and must
+        stop when the turn does — a subagent, most of all. Deliberately the
+        activity scope and not the lifetime: fusing a child to the lifetime
+        would keep it running after the parent's turn was cancelled, finishing
+        work no one is waiting for and billing for it.
+        """
+        return self._activity
+
     async def when_idle(self) -> None:
         """Wait for any background drain to finish."""
         task = self._draining

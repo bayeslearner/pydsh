@@ -189,16 +189,34 @@ uv run pytest tests  # the suite
   of raising across a transport. `ctx.long_term_memory` captures each exchange
   keyed by content and recalls what overlaps into a later session — as history,
   like every other context here.
+- **Plan mode** (`pydsh.plan`, `ctx.plan_mode`): a recorded collaboration
+  state, folded from the log so a resumed session has it with nothing to
+  rebuild. A flip requested while a turn is running is *held* until the next
+  turn boundary — a turn runs under one set of rules from its first step to its
+  last — and `exit_plan_mode` puts the finished plan to a review channel, or
+  says plainly that there is none rather than inventing an approval.
+- **Subagents** (`ctx.tools`' `subagent`): a child agent on a standalone
+  prompt, in its own session, seeing nothing of the parent conversation. Depth
+  is counted along the call chain, so five siblings started in parallel are all
+  at the same depth; and the child is fused to the parent's *turn*, so
+  cancelling the turn stops the child rather than leaving it to finish work
+  nobody is waiting for.
+- **The console** (`pydsh.console`): the commands a person types. `/compact`
+  turns each compaction outcome into a sentence routed by code rather than by
+  message text; `/goal` reads the current objective and never shows anyone a
+  revision number; `/feedback` records what someone thinks of a conversation as
+  a log-only event, so it never becomes part of the conversation it is about.
+  None of them raises at the person who typed it.
 - **Cancellation** (`pydsh.cancel`): `AbortSignal` semantics, with two scopes
   per agent. `cancel()` stops the work in flight and leaves the agent usable;
   only a lifetime abort — the caller tearing down, or the loop being unmounted
   — ends it.
 
 No provider adapter ships here — `openai_compatible`, `deepseek` and `pi_ai`
-are plugins in a later sprint. `plan_mode` (the rest of the Agent seam, which
-needs commands and projections first) and the wider service catalogue are
-queued in the order
-[`docs/design/service-catalogue.md`](docs/design/service-catalogue.md) defines.
+are plugins in a later sprint, along with `mcp_client` and the app layer (SDK,
+gateway, CLI). Everything else in
+[`docs/design/service-catalogue.md`](docs/design/service-catalogue.md) is
+ported.
 
 ## Where each kind of truth lives
 

@@ -30,6 +30,13 @@ from .agent import (
 from .assembler import BlockAssembler
 from .inbox import NEXT_STEP, NEXT_TURN, SPLICE_EVENT, Inbox
 from .registry import AgentLoop, AgentRegistry
+from .subagent import (
+    DEFAULT_MAX_DEPTH,
+    DEFAULT_MAX_OUTPUT_BYTES,
+    SUBAGENT_SCHEMA,
+    SubagentTool,
+    branch_depth,
+)
 
 __all__ = [
     "Agent",
@@ -49,4 +56,9 @@ __all__ = [
     "STATUS",
     "SESSION_START",
     "AGENT_LOOP_SETTINGS",
+    "SubagentTool",
+    "branch_depth",
+    "SUBAGENT_SCHEMA",
+    "DEFAULT_MAX_DEPTH",
+    "DEFAULT_MAX_OUTPUT_BYTES",
 ]

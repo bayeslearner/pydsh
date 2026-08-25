@@ -139,19 +139,22 @@ class BasicCompaction(CompactionEngine):
 
         if not shadowed:
             raise CompactionRefused(
-                f"no surface node lies in [{start}, {end}]; the surface holds {nodes}"
+                f"no surface node lies in [{start}, {end}]; the surface holds {nodes}",
+                "empty",
             )
         if start > end:
-            raise CompactionRefused(f"region [{start}, {end}] is inverted")
+            raise CompactionRefused(f"region [{start}, {end}] is inverted", "inverted")
         if not balanced_before(session, shadowed[0]):
             raise CompactionRefused(
                 f"the cut before surface node {shadowed[0]} would separate a tool "
-                "call from its result"
+                "call from its result",
+                "unbalanced",
             )
         if not balanced_after(session, shadowed[-1]):
             raise CompactionRefused(
                 f"the cut after surface node {shadowed[-1]} would separate a tool "
-                "call from its result"
+                "call from its result",
+                "unbalanced",
             )
 
         compaction_id = uuid.uuid4().hex[:12]

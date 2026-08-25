@@ -129,6 +129,19 @@ class SessionStore(Service):
         self._sessions[id] = session
         return session
 
+    def remove(self, id: str) -> bool:
+        """Stop tracking a session; ``False`` when it was not tracked.
+
+        For a caller that created a session it owns outright — a subagent's
+        scratch conversation, most obviously. Without this, a short-lived
+        session created outside a plugin fiber is store-owned until unload,
+        so a long-running process accumulates every one it ever spawned.
+
+        Removing does not delete anything persisted: the log on disk, if it
+        was ever flushed, stays exactly where it was.
+        """
+        return self._sessions.pop(id, None) is not None
+
     def get(self, id: str) -> Optional[Session]:
         return self._sessions.get(id)
 
