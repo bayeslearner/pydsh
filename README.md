@@ -160,6 +160,12 @@ uv run pytest tests  # the suite
   two context injectors that demonstrate context reaching the model as history
   rather than as rewritten prompt. These are the behaviour that proves the
   seams compose, and the piece a consumer swaps rather than writes.
+- **Jobs and goals** (`pydsh.work`): `ctx.jobs` runs background work owned by
+  the session that started it — the owner is a fence checked on every
+  operation, and a job you do not own is reported as absent rather than
+  forbidden. `ctx.goals` folds a durable objective out of the session log with
+  compare-and-set semantics, so two writers cannot silently overwrite each
+  other; arming is process-local and never persisted.
 - **Cancellation** (`pydsh.cancel`): `AbortSignal` semantics, with two scopes
   per agent. `cancel()` stops the work in flight and leaves the agent usable;
   only a lifetime abort — the caller tearing down, or the loop being unmounted

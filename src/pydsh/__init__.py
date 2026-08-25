@@ -77,6 +77,13 @@ from .message import (
     decode_payload,
     encode_payload,
 )
+from .work import (
+    GoalError,
+    GoalService,
+    GoalTool,
+    JobTools,
+    LocalJobs,
+)
 from .tools import (
     BashTool,
     FsTools,
@@ -175,6 +182,12 @@ __all__ = [
     "ProjectionDefinition",
     "SessionStats",
     "CheckpointPolicy",
+    # jobs and goals
+    "LocalJobs",
+    "JobTools",
+    "GoalService",
+    "GoalTool",
+    "GoalError",
     # default tools
     "FsTools",
     "BashTool",
