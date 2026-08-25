@@ -44,7 +44,7 @@ adapters are **provider-domain**, and application-shaped concepts are
 | `projection_cache` (ctx.sessionProjectionCache) | core | "shortcut, never authority" |
 | `session_query` / `session_reference` | core | history read/trace/filter + cross-session snapshot refs |
 | `session_persistence.CheckpointPolicy` | core | turn-count checkpointing |
-| `brand` (MessageId/CallId, nominal brands) | core | tiny typing helper |
+| `brand` (MessageId/CallId, nominal brands) | **convention, not a module** | the reference's `brand.py` is a type alias plus a docstring with no runtime behaviour. The convention it documents — one `str` subclass per id type, constructed through its owner's factory — is the rule here; porting the empty module to claim the row would be paper coverage |
 
 ### LLM seam
 

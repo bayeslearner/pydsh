@@ -110,6 +110,17 @@ uv run pytest tests  # the suite
   rendering a broken prompt, and a configurable tool order. Mounted, the loop
   builds its system prompt from it; unmounted, it falls back to
   `AgentOptions.system`.
+- **Projections** (`ctx.session_projections`): a domain contributes three pure
+  functions — `init`, `apply`, `view` — and the framework owns the
+  subscription, the per-session watermark cache, and the change stream.
+  Identity is the change gate, so a unit that ignores an event costs nothing on
+  it. Includes the cold-read ladder (`checkpoint` / `view_checkpoint` /
+  `restore`) a durable cache calls, version-gated so a stale row is dropped
+  rather than fed forward.
+- **Session stats** (`ctx.session_stats`): the first unit — turns, steps, model
+  time, tool time, time-to-first-token, and decode rate, folded from the log.
+- **Automatic durability** (`ctx.checkpoint_policy`): flushes every N turns, so
+  a conversation reaches disk without a consumer remembering to ask.
 - **Cancellation** (`pydsh.cancel`): `AbortSignal` semantics, with two scopes
   per agent. `cancel()` stops the work in flight and leaves the agent usable;
   only a lifetime abort — the caller tearing down, or the loop being unmounted

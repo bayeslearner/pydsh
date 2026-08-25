@@ -3,6 +3,10 @@
 - ``Session`` — the append-only event log and derived messages (a plain class).
 - ``SessionStore`` — the ``ctx.sessions`` service holding live sessions.
 - ``SqliteSessionPersistence`` — the durable SQLite backend.
+- ``SessionProjections`` — reading the log as state, the fold primitive.
+- ``SessionStats`` — the first unit: turns, steps, and four timings.
+- ``CheckpointPolicy`` — periodic durability, so a flush is not something a
+  consumer has to remember.
 
 `ponytail:` ``derive_messages`` returns payload messages directly; the rich
 typed ``Message``/ContentBlock vocabulary arrives with the llm seam. The
@@ -10,6 +14,7 @@ typed ``Message``/ContentBlock vocabulary arrives with the llm seam. The
 compaction sprint.
 """
 
+from .checkpoint import DEFAULT_EVERY_TURNS, CheckpointPolicy
 from .events import (
     EVENT_DATA_FIELDS,
     EVENT_TYPES,
@@ -17,6 +22,12 @@ from .events import (
     STEP_EVENTS,
     SURFACE_EVENTS,
     TURN_EVENTS,
+)
+from .projection import (
+    EMPTY_WATERMARK,
+    FIRST_SEQ,
+    ProjectionDefinition,
+    SessionProjections,
 )
 from .persistence import (
     SessionFormatUnsupportedError,
@@ -32,6 +43,7 @@ from .session import (
     SessionHeader,
     UnknownEventType,
 )
+from .stats import SESSION_STATS_KEY, SessionStats, session_stats_definition
 from .store import SessionStore
 
 __all__ = [
@@ -46,6 +58,17 @@ __all__ = [
     "SessionPersistenceError",
     "SessionFormatUnsupportedError",
     "SqliteSessionPersistence",
+    # projections
+    "SessionProjections",
+    "ProjectionDefinition",
+    "SessionStats",
+    "session_stats_definition",
+    "SESSION_STATS_KEY",
+    "EMPTY_WATERMARK",
+    "FIRST_SEQ",
+    # durability
+    "CheckpointPolicy",
+    "DEFAULT_EVERY_TURNS",
     # vocabulary
     "SESSION_FORMAT_VERSION",
     "EVENT_TYPES",

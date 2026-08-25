@@ -78,10 +78,14 @@ from .message import (
     encode_payload,
 )
 from .session import (
+    CheckpointPolicy,
+    ProjectionDefinition,
     Session,
     SessionEvent,
     SessionHeader,
     SessionPersistence,
+    SessionProjections,
+    SessionStats,
     SessionStore,
     SqliteSessionPersistence,
 )
@@ -112,6 +116,11 @@ __all__ = [
     "SessionHeader",
     "SessionPersistence",
     "SqliteSessionPersistence",
+    # projections + durability
+    "SessionProjections",
+    "ProjectionDefinition",
+    "SessionStats",
+    "CheckpointPolicy",
     # llm seam
     "LlmService",
     "LlmAdapter",
