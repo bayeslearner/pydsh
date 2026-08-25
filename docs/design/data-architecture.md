@@ -36,6 +36,15 @@ reaches a model request must be reconstructable from the log.
 | Storage unit — JSON file | the JSON backend, one atomic replace per write | rolling | **source of truth** for its domain | loaded whole at `open`, then read from memory | until its owner deletes it | no — it *is* the record |
 | Storage unit — SQLite rows | the SQLite backend | rolling | **source of truth** for its domain | same | same | no |
 | Domain in-memory records | the domain runtime | rolling | **derived** from the unit above | synchronous `table.get()` | process lifetime | yes — by reopening the domain |
+| Attachment content | `ctx.attachments`, one atomic write per content address | immutable | **source of truth** — the only copy of the bytes | by id, re-hashed on every read | until a consumer prunes it | no — the bytes cannot be recomputed from anything in the log |
+| Feedback rows | `ctx.message_feedback`, through a storage domain | rolling, whole-value replace under a version token | **source of truth** for the opinion | by session and message, fenced by session lifetime | with the session | no — an opinion about a message is not derivable from the message |
+| Memories | `ctx.long_term_memory`, keyed by content digest | append-only in practice (a repeat is the same key) | **source of truth** | keyword recall with a recency fallback | until pruned | partly — recapturable from a session log that still exists, but a memory outlives the log it came from |
+
+Three of those rows are **not derived**, and that is the honest reading: a
+picture, a rating, and a memory of an earlier conversation cannot be recomputed
+from the log. They are sidecars — durable data *about* a conversation, stored
+beside it rather than on its surface, so none of them changes what the model
+reads next turn.
 
 The last column is the one that catches recompute bugs: `derive_messages`
 must never read storage state the log cannot reproduce. The surface is

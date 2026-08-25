@@ -151,6 +151,20 @@ from .storage import (
     define_domain,
     domain_table,
 )
+from .sidecar import (
+    AttachmentError,
+    AttachmentStore,
+    FeedbackError,
+    InvocationDescriptor,
+    LocalAttachments,
+    LongTermMemory,
+    MessageFeedback,
+    RemoteResult,
+    TypertRegistry,
+    content_id,
+    remote,
+    remote_scope,
+)
 from .session import (
     CheckpointPolicy,
     ProjectionCache,
@@ -252,6 +266,19 @@ __all__ = [
     "CommandResult",
     "AnonymousUserId",
     "ProjectionCache",
+    # sidecars
+    "AttachmentStore",
+    "LocalAttachments",
+    "AttachmentError",
+    "content_id",
+    "MessageFeedback",
+    "FeedbackError",
+    "TypertRegistry",
+    "InvocationDescriptor",
+    "RemoteResult",
+    "remote",
+    "remote_scope",
+    "LongTermMemory",
     # storage seam
     "Storage",
     "JsonStorage",

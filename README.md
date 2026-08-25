@@ -178,6 +178,17 @@ uv run pytest tests  # the suite
   `ctx.hooks` runs a deployment's own commands at points in the loop and merges
   their answers conservatively — any block wins; `ctx.invariants` makes a
   violated assumption loud rather than mysterious.
+- **Sidecars** (`pydsh.sidecar`): the things that are *about* a conversation
+  without being *in* it. `ctx.attachments` stores immutable content under a
+  content address — a reference names the bytes, never a place to look, and
+  reading re-hashes so a swapped file is caught rather than served.
+  `ctx.message_feedback` keeps a rating or note beside the log rather than on
+  it, fenced by session lifetime and written compare-and-set.  `ctx.typert`
+  exposes methods a class explicitly marks, so a public helper never quietly
+  widens the remote API, and an invocation returns a structured failure instead
+  of raising across a transport. `ctx.long_term_memory` captures each exchange
+  keyed by content and recalls what overlaps into a later session — as history,
+  like every other context here.
 - **Cancellation** (`pydsh.cancel`): `AbortSignal` semantics, with two scopes
   per agent. `cancel()` stops the work in flight and leaves the agent usable;
   only a lifetime abort — the caller tearing down, or the loop being unmounted

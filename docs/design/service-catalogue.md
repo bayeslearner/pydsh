@@ -138,10 +138,11 @@ prompt. A port that skips them loses the proof that the injection seam works.
 | `schedule` / `schedule_domain` | core | durable reminders on the session log |
 | `goal` / `goal_fold` (ctx.goals) | core | event-sourced persistent objective |
 | `hooks_protocol` | core | dialect-neutral external-command hooks |
-| `message_feedback` | **core?** | durable per-message sidecar; fence with persistent-session identity |
+| `message_feedback` | core | durable per-message sidecar, fenced by session *lifetime* (id + creation time), not by id — a reused id must not surface a previous life's ratings |
 | `long_term_memory` (plugin) | core (plugin) | cross-session recall at turn/end |
-| `attachment` / `attachment_local` / `attachment_image` (ctx.attachments) | core | content-addressed attachments |
-| `typert` (ctx.typertRegistry) | core | declarative remote-call protocol |
+| `attachment` / `attachment_local` (ctx.attachments) | core | content-addressed attachments |
+| `attachment_image` | core, **partial** | validation only: size and declared type. Decoding image formats belongs to a consumer's chosen library, not to a stdlib-only core |
+| `typert` (ctx.typert) | core | declarative remote-call protocol. Ported as a runtime **scan**, not a generator: the reference's TypeScript code generator exists because TS cannot read its own decorators at runtime, and Python can |
 | `tool_result_pruner` | core | replay-safe tool-result trimming |
 | `compaction` / `compaction_basic` | core (later) | surface replace + summary; blocked by spec 01's `surfaceOp: replace` deferral |
 | `invariants` | core (later) | runtime invariant registry |
