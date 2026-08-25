@@ -77,6 +77,16 @@ from .message import (
     decode_payload,
     encode_payload,
 )
+from .capability import (
+    Deadline,
+    FileSystem,
+    IdleWatchdog,
+    ShellService,
+    TerminalService,
+    TimeoutReason,
+    clamp_timeout,
+    deadline,
+)
 from .operating import (
     AnonymousUserId,
     CommandInvocation,
@@ -141,6 +151,15 @@ __all__ = [
     "ProjectionDefinition",
     "SessionStats",
     "CheckpointPolicy",
+    # capability seams
+    "FileSystem",
+    "ShellService",
+    "TerminalService",
+    "TimeoutReason",
+    "Deadline",
+    "deadline",
+    "clamp_timeout",
+    "IdleWatchdog",
     # operating core
     "Settings",
     "Credentials",

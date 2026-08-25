@@ -138,6 +138,12 @@ uv run pytest tests  # the suite
   through the storage seam, so listing archived conversations with their stats
   is a table read rather than a hundred log folds. It may lag the log; it never
   leads it.
+- **Capability seams** (`pydsh.capability`): `ctx.fs` (a file system whose
+  execution root holds against symlinks, and whose reads are bounded in cost
+  rather than only in output), `ctx.shell` (one-shot commands whose timeout
+  signals the whole process group, so nothing is left running), `ctx.terminal`
+  (shells that keep their state between calls), and deadlines that are
+  distinguishable from cancellations.
 - **Cancellation** (`pydsh.cancel`): `AbortSignal` semantics, with two scopes
   per agent. `cancel()` stops the work in flight and leaves the agent usable;
   only a lifetime abort — the caller tearing down, or the loop being unmounted
