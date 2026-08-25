@@ -58,7 +58,7 @@ adapters are **provider-domain**, and application-shaped concepts are
 | `brand` | core | covered above |
 | adapters: `openai_compatible` | **provider-domain** | the default plugin. The block index is allocated by the translator, not taken from the wire's `tool_calls[].index` — that number is the provider's own tool numbering and collides with the text block at 0 |
 | adapters: `deepseek` | **provider-domain** | extends `openai_compatible` rather than copying it; adds quota/context-overflow classification and `thinking` resolution |
-| adapters: `pi_ai` | **provider-domain** | queued behind `deepseek` |
+| adapters: `pi_ai` | **provider-domain** | the catalogue-driven adapter: a built-in provider/model table with capacities, resolved against config once at mount and refusing anything this build cannot serve. Protocol and thinking-format tables are **narrower** than the reference's (one protocol, two formats) and say so on refusal, rather than accepting a config that fails at the first request |
 
 ### Agent seam
 

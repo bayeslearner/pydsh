@@ -219,6 +219,15 @@ uv run pytest tests  # the suite
   deployment can hand over its own HTTP client and every test here drives real
   SSE bytes without opening a socket. The default transport is httpx, an
   optional extra (`pydsh[http]`), imported lazily.
+- **The catalogue adapter** (`ctx.pi_ai`): one plugin over many routes, each
+  resolved against a built-in catalogue of *models* — what each holds, what it
+  can produce, which modalities it takes, how it spells reasoning. Compaction
+  budgets against a real context window instead of a guess, and a request for
+  reasoning on a model that cannot reason is refused here rather than by the
+  endpoint. Config lays over the catalogue field by field and anything this
+  build cannot serve is refused **at mount**, with the supported set named — a
+  narrow table that fails loudly beats a broad one that fails at the first
+  request in production.
 - **Cancellation** (`pydsh.cancel`): `AbortSignal` semantics, with two scopes
   per agent. `cancel()` stops the work in flight and leaves the agent usable;
   only a lifetime abort — the caller tearing down, or the loop being unmounted

@@ -54,6 +54,8 @@ from .llm import (
     LlmService,
     DeepSeek,
     OpenAICompatible,
+    PiAi,
+    ProfileError,
     ProviderConfig,
     Transport,
     ResolvedRetryPolicy,
@@ -315,6 +317,8 @@ __all__ = [
     # provider adapters
     "OpenAICompatible",
     "DeepSeek",
+    "PiAi",
+    "ProfileError",
     "ProviderConfig",
     "Transport",
     # agent seam
