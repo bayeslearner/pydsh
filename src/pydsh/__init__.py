@@ -77,6 +77,16 @@ from .message import (
     decode_payload,
     encode_payload,
 )
+from .tools import (
+    BashTool,
+    FsTools,
+    RepeatToolGuard,
+    SpillPolicy,
+    SystemInstructions,
+    TerminalTool,
+    TimeContext,
+    TodoTool,
+)
 from .compaction import (
     BasicCompaction,
     CompactionEngine,
@@ -165,6 +175,15 @@ __all__ = [
     "ProjectionDefinition",
     "SessionStats",
     "CheckpointPolicy",
+    # default tools
+    "FsTools",
+    "BashTool",
+    "TerminalTool",
+    "TodoTool",
+    "RepeatToolGuard",
+    "SpillPolicy",
+    "TimeContext",
+    "SystemInstructions",
     # compaction
     "CompactionEngine",
     "CompactionResult",

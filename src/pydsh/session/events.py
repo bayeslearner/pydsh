@@ -46,6 +46,9 @@ EVENT_TYPES = (
     "compaction/start",
     "compaction/summary",
     "compaction/end",
+    # todo/write — the whole task list, replacing the last one. Log-only: a
+    # UI renders from the event stream and the `todos` projection folds it.
+    "todo/write",
     # agent/inbox/spliced — one change to the agent's pending-input queues.
     # Log-only, and the reason the inbox survives a restart: the queues are a
     # projection of these events, never state that lives only in memory.
@@ -80,4 +83,5 @@ EVENT_DATA_FIELDS: dict[str, tuple[str, ...]] = {
         "model",
     ),
     "compaction/end": ("compaction_id", "error"),
+    "todo/write": ("items",),
 }

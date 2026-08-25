@@ -154,6 +154,12 @@ uv run pytest tests  # the suite
   declares it shadows a range of the *surface*, and every original stays
   readable at its original sequence. A region may only be replaced if both its
   edges are balanced cuts, so a tool call is never separated from its result.
+- **The default tools** (`pydsh.tools`): `read`/`write`/`edit` over `ctx.fs`,
+  `bash` over `ctx.shell`, `terminal` over persistent sessions, `todo_write`,
+  a repeat-call guard that reminds rather than refuses, a spill policy, and the
+  two context injectors that demonstrate context reaching the model as history
+  rather than as rewritten prompt. These are the behaviour that proves the
+  seams compose, and the piece a consumer swaps rather than writes.
 - **Cancellation** (`pydsh.cancel`): `AbortSignal` semantics, with two scopes
   per agent. `cancel()` stops the work in flight and leaves the agent usable;
   only a lifetime abort — the caller tearing down, or the loop being unmounted

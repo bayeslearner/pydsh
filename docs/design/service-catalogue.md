@@ -76,7 +76,7 @@ adapters are **provider-domain**, and application-shaped concepts are
 |---|---|---|
 | `tools` (ctx.tools) | **plugkit-shipped** | reuse `ToolsService`; map reference semantics onto it, don't re-port |
 | `guard_repeat_tool` | core (a guard plugin) | listens `tools/post-execute` |
-| `guard_timeout` | core (a guard plugin) | listens `tools/execute`; or plugkit `timeout_policy` |
+| `guard_timeout` | **plugkit-shipped** | plugkit's `timeout_policy` is the same stage-3 wrapper over each tool's own budget; re-porting it would be two implementations of one concern (lens S3) |
 | the `tool_*` plugins | **plugin** | see the Default plugins table below — every one is a `ctx.tools.register` + handlers |
 
 ### Default plugins (the reference's whole plugin layer)
