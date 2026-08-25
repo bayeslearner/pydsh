@@ -20,6 +20,15 @@ from .call_config import (
     merge_call_config,
 )
 from .chunks import ChunkType, GenerateOptions, StreamChunk, is_token_delta
+from .adapters import (
+    DeepSeek,
+    DeepSeekAdapter,
+    OpenAICompatible,
+    OpenAICompatibleAdapter,
+    ProviderConfig,
+    Transport,
+    httpx_transport,
+)
 from .errors import LlmError, normalize_api_key
 from .retry import (
     DEFAULT_RETRYABLE_CODES,
@@ -51,6 +60,14 @@ __all__ = [
     # errors
     "LlmError",
     "normalize_api_key",
+    # provider adapters (provider-domain plugins)
+    "OpenAICompatible",
+    "OpenAICompatibleAdapter",
+    "DeepSeek",
+    "DeepSeekAdapter",
+    "ProviderConfig",
+    "Transport",
+    "httpx_transport",
     # call config
     "LlmCallConfig",
     "merge_call_config",

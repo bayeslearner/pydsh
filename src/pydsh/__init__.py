@@ -52,6 +52,10 @@ from .llm import (
     LlmError,
     LlmProviderInfo,
     LlmService,
+    DeepSeek,
+    OpenAICompatible,
+    ProviderConfig,
+    Transport,
     ResolvedRetryPolicy,
     RetryPolicyError,
     StreamChunk,
@@ -308,6 +312,11 @@ __all__ = [
     "resolve_retry_policy",
     "AppIdentity",
     "attribution_headers",
+    # provider adapters
+    "OpenAICompatible",
+    "DeepSeek",
+    "ProviderConfig",
+    "Transport",
     # agent seam
     "AgentRegistry",
     "AgentLoop",

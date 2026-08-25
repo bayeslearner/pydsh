@@ -46,8 +46,10 @@ plugkit gates activation on those, so a loop mounted early stays pending until
 they arrive rather than coming up half-working. `ToolsService` is optional —
 without it the model is offered no tools.
 
-Mount a provider adapter of your own onto `ctx.llm` — pydsh ships none, by
-design (see the coverage contract).
+Mount a provider adapter: `OpenAICompatible` covers seven vendors and
+`DeepSeek` its own, or write your own onto `ctx.llm`. They are plugins, not
+core — see the coverage contract. For the built-in HTTP transport, install
+`pydsh[http]`; supply your own `transport=` and you need nothing extra.
 
 ## Developing on it
 
@@ -207,14 +209,23 @@ uv run pytest tests  # the suite
   revision number; `/feedback` records what someone thinks of a conversation as
   a log-only event, so it never becomes part of the conversation it is about.
   None of them raises at the person who typed it.
+- **Provider adapters** (`pydsh.llm.adapters`): the only part of pydsh that
+  speaks to a network, and mounted as plugins rather than built in.
+  `OpenAICompatible` covers the `/chat/completions` dialect and the seven
+  vendors that speak it, registered dormant until their credential resolves;
+  `DeepSeek` adds reasoning and a failure vocabulary that tells a spent quota
+  apart from a rate limit, and a context overflow apart from a bad request —
+  because those pairs want opposite responses. The transport is a seam, so a
+  deployment can hand over its own HTTP client and every test here drives real
+  SSE bytes without opening a socket. The default transport is httpx, an
+  optional extra (`pydsh[http]`), imported lazily.
 - **Cancellation** (`pydsh.cancel`): `AbortSignal` semantics, with two scopes
   per agent. `cancel()` stops the work in flight and leaves the agent usable;
   only a lifetime abort — the caller tearing down, or the loop being unmounted
   — ends it.
 
-No provider adapter ships here — `openai_compatible`, `deepseek` and `pi_ai`
-are plugins in a later sprint, along with `mcp_client` and the app layer (SDK,
-gateway, CLI). Everything else in
+Still to come: `pi_ai` and `mcp_client`, then the app layer (SDK, gateway,
+CLI). Everything else in
 [`docs/design/service-catalogue.md`](docs/design/service-catalogue.md) is
 ported.
 

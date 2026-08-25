@@ -56,8 +56,9 @@ adapters are **provider-domain**, and application-shaped concepts are
 | `attribution` (User-Agent) | core | must be sent by every HTTP adapter |
 | `token_meter` (ctx.tokenMeter) | core | heuristic estimator |
 | `brand` | core | covered above |
-| adapters: `openai_compatible` | **provider-domain** | ship as the default plugin |
-| adapters: `deepseek`, `pi_ai` | **provider-domain** | ported as plugins, swap via config |
+| adapters: `openai_compatible` | **provider-domain** | the default plugin. The block index is allocated by the translator, not taken from the wire's `tool_calls[].index` — that number is the provider's own tool numbering and collides with the text block at 0 |
+| adapters: `deepseek` | **provider-domain** | extends `openai_compatible` rather than copying it; adds quota/context-overflow classification and `thinking` resolution |
+| adapters: `pi_ai` | **provider-domain** | queued behind `deepseek` |
 
 ### Agent seam
 
