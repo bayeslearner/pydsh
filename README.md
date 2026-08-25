@@ -121,6 +121,13 @@ uv run pytest tests  # the suite
   time, tool time, time-to-first-token, and decode rate, folded from the log.
 - **Automatic durability** (`ctx.checkpoint_policy`): flushes every N turns, so
   a conversation reaches disk without a consumer remembering to ask.
+- **Storage** (`pydsh.storage`): a hub (`ctx.storage`) that does no I/O and
+  holds named backends, two interchangeable media (a JSON file per unit, or
+  SQLite rows), and a domain form (`ctx.storage_domain`) that owns what a
+  record *means* — declared domains, schema-validated tables, synchronous
+  reads from memory, one write chain per domain, and a change event. Writes go
+  durable first, memory second, event third, so the read path is never ahead of
+  what is on disk.
 - **Cancellation** (`pydsh.cancel`): `AbortSignal` semantics, with two scopes
   per agent. `cancel()` stops the work in flight and leaves the agent usable;
   only a lifetime abort — the caller tearing down, or the loop being unmounted

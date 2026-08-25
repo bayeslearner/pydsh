@@ -17,7 +17,7 @@ model calls live there, composed as plugins above this layer). dsh builds the
 |---|---|---|
 | **Storage** | the durable session log on disk (SQLite) | `src/pydsh/session/` |
 | **Computation** | the in-memory ordered surface (`derive_messages`), projection, invariant checks | `src/pydsh/session/` |
-| **Business** | the agent loop, tools, prompt assembly, model calls | *not this repo* |
+| **Business** | the agent loop, tools, prompt assembly, model calls | `src/pydsh/agent/`, `src/pydsh/prompt/` |
 
 Boundary contract: **storage ↔ computation is the append-only event log.** The
 computation tier reads the log; it never writes it. `Session.append(type, data)`
@@ -31,6 +31,10 @@ reaches a model request must be reconstructable from the log.
 | SQLite session log | `Session.append` (via `SessionStore` / persistence backend) | immutable, append-only | **source of truth** | load log → rebuild in-memory `Session` | whole log for a session id | yes — load + replay reproduces the identical event list |
 | In-memory session list | `SessionStore` (create/enter) | rolling | derived (from SQLite after restart) | `ctx.sessions.get/list` | current process only | no — rebuilt from SQLite on boot |
 | In-memory ordered surface | `Session._apply_surface_replace` | rolling | **derived** from the log's surface events | `derive_messages()` | current process only | yes — recomputable from the log at any time; the recompute is faithful because replacement nodes carry `sourceEventSeqs` |
+| Projection cells | the projection registry, driven by `session/event` | rolling | **derived** from the log | `session_projections.snapshot()` | current process only | yes — folding the log from `init` gives the same state as having been driven |
+| Storage unit — JSON file | the JSON backend, one atomic replace per write | rolling | **source of truth** for its domain | loaded whole at `open`, then read from memory | until its owner deletes it | no — it *is* the record |
+| Storage unit — SQLite rows | the SQLite backend | rolling | **source of truth** for its domain | same | same | no |
+| Domain in-memory records | the domain runtime | rolling | **derived** from the unit above | synchronous `table.get()` | process lifetime | yes — by reopening the domain |
 
 The last column is the one that catches recompute bugs: `derive_messages`
 must never read storage state the log cannot reproduce. The surface is
@@ -52,6 +56,21 @@ adopts them verbatim (they are plugkit event-dispatch modes):
 Consequence for design: persistence is a *listener* on `session/flush`, not a
 direct call out of `SessionStore.flush()`; `flush` fans out and awaits the
 backend.
+
+## The two stores that are not the log
+
+The session log's table is bespoke and predates the hub; it stays where it is
+(a rewrite with no behaviour change on the one store already proven across a
+process restart buys nothing). Everything else that persists goes through the
+storage hub, which is what stops each new store inventing its own file format,
+its own validation, and its own answer to "is it on disk yet".
+
+The line that makes the derived row above safe is the domain layer's write
+order: **durable first, memory second, event third**. In-memory records move
+only after the backend has accepted the write, so a rejected write leaves a
+reader seeing exactly what is stored. Reverse the order and the two fork
+silently — the running process disagrees with the next one to open the unit,
+and nothing reports it.
 
 ## Storage-engine choice
 

@@ -77,6 +77,17 @@ from .message import (
     decode_payload,
     encode_payload,
 )
+from .storage import (
+    Domain,
+    DomainSpec,
+    JsonStorage,
+    SqliteStorage,
+    Storage,
+    StorageDomain,
+    StorageError,
+    define_domain,
+    domain_table,
+)
 from .session import (
     CheckpointPolicy,
     ProjectionDefinition,
@@ -121,6 +132,16 @@ __all__ = [
     "ProjectionDefinition",
     "SessionStats",
     "CheckpointPolicy",
+    # storage seam
+    "Storage",
+    "JsonStorage",
+    "SqliteStorage",
+    "StorageDomain",
+    "Domain",
+    "DomainSpec",
+    "define_domain",
+    "domain_table",
+    "StorageError",
     # llm seam
     "LlmService",
     "LlmAdapter",
