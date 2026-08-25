@@ -1,0 +1,7 @@
+{
+  "active": true,
+  "goal": "Port the DeepSeek Harness service layer to catalogue parity.",
+  "done_when": "Every row in docs/design/service-catalogue.md is either ported and covered by tests, or recorded there as deliberately out of scope with the reason. The route is docs/history/2026-08-24-parity-route.md; sprints run in order and each closes CLOSED/SHIPPED with the suite green.",
+  "note": "Standing order given 2026-08-24: 'loop until you reach parity'. Finishing a sprint is not finishing the order. Do not end a turn to report progress or to ask whether to continue.",
+  "max_blocks": 200
+}
