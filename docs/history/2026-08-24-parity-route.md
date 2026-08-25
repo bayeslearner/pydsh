@@ -39,3 +39,18 @@ Read the reference module before porting it, and where the reference is wrong,
 deviate deliberately and record it in that sprint's Decisions. Sprint 03 found
 six such defects in one module; reproducing them for fidelity's sake would be
 porting the bugs, not the semantics.
+
+## Revision — 2026-08-25
+
+The order below shifted as sprints landed, for reasons worth recording:
+
+- 08 became the *capability* seams (`fs`, `shell`, `terminal`, `timeout`) and
+  09 the *bounded-output* family (`retention`, `spill`, `tool_result_pruner`).
+  They were one sprint on paper; they are two concerns.
+- **Compaction moves up to 10.** It owns the `surfaceOp: replace` machinery
+  that spec 01 defined and did not implement, and two things now wait on it:
+  compaction itself and `prune_session`. A blocker for two consumers is not a
+  late sprint.
+- The default tool plugins follow compaction, since the guards among them
+  (`guard_repeat_tool`, `spill_policy`) hook the tools pipeline and want the
+  bounded-output family that now exists.

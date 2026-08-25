@@ -77,6 +77,14 @@ from .message import (
     decode_payload,
     encode_payload,
 )
+from .bounded import (
+    ItemRetainer,
+    LocalSpillStore,
+    SpillStore,
+    TextRetainer,
+    ToolResultPruner,
+    format_retention_notice,
+)
 from .capability import (
     Deadline,
     FileSystem,
@@ -151,6 +159,13 @@ __all__ = [
     "ProjectionDefinition",
     "SessionStats",
     "CheckpointPolicy",
+    # bounded output
+    "ItemRetainer",
+    "TextRetainer",
+    "format_retention_notice",
+    "SpillStore",
+    "LocalSpillStore",
+    "ToolResultPruner",
     # capability seams
     "FileSystem",
     "ShellService",

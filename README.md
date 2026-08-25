@@ -144,6 +144,11 @@ uv run pytest tests  # the suite
   signals the whole process group, so nothing is left running), `ctx.terminal`
   (shells that keep their state between calls), and deadlines that are
   distinguishable from cancellations.
+- **Bounded output** (`pydsh.bounded`): retainers that bound a stream as it
+  arrives (in items, or in bytes with UTF-8 cuts that never break a character),
+  a spill store that puts oversized output where the model can read it back,
+  and a deterministic pruner that cuts the middle out of an over-budget result.
+  Everything that drops data says how much.
 - **Cancellation** (`pydsh.cancel`): `AbortSignal` semantics, with two scopes
   per agent. `cancel()` stops the work in flight and leaves the agent usable;
   only a lifetime abort — the caller tearing down, or the loop being unmounted
