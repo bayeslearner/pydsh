@@ -77,6 +77,13 @@ from .message import (
     decode_payload,
     encode_payload,
 )
+from .query import (
+    QueryError,
+    SessionQueryEngine,
+    SessionReferences,
+    decode_reference_uri,
+    encode_reference_uri,
+)
 from .work import (
     GoalError,
     GoalService,
@@ -182,6 +189,12 @@ __all__ = [
     "ProjectionDefinition",
     "SessionStats",
     "CheckpointPolicy",
+    # reading history
+    "SessionQueryEngine",
+    "SessionReferences",
+    "QueryError",
+    "encode_reference_uri",
+    "decode_reference_uri",
     # jobs and goals
     "LocalJobs",
     "JobTools",

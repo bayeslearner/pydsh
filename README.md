@@ -166,6 +166,12 @@ uv run pytest tests  # the suite
   forbidden. `ctx.goals` folds a durable objective out of the session log with
   compare-and-set semantics, so two writers cannot silently overwrite each
   other; arming is process-local and never persisted.
+- **Reading history** (`pydsh.query`): `ctx.session_query` searches the corpus
+  — list, read, and filter sessions and their events by time, type, text, or
+  where they sit on the surface. Filters are data, so a client can send them
+  over a wire, and text search is literal. `ctx.session_references` gives
+  canonical URIs and Markdown mentions for pointing one session at another,
+  with a bounded projection so a reference is not a paste.
 - **Cancellation** (`pydsh.cancel`): `AbortSignal` semantics, with two scopes
   per agent. `cancel()` stops the work in flight and leaves the agent usable;
   only a lifetime abort — the caller tearing down, or the loop being unmounted
