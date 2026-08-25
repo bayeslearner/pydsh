@@ -51,6 +51,13 @@ from .cancel import CancelledError, CancelSignal
 from .console import CompactCommand, FeedbackCommand, GoalCommand, record_feedback
 from .mcp import McpClient, McpClientPlugin, McpError, public_tool_name
 from .plan import PlanMode, PlanModeError, fold_plan_mode
+from .runtime import (
+    JsonRpcTransport,
+    RemoteSession,
+    RuntimeClient,
+    RuntimeServer,
+    TransportClosed,
+)
 from .dispatch import emit_contained
 from .llm import (
     AdapterRegistration,
@@ -360,6 +367,12 @@ __all__ = [
     "McpClient",
     "McpError",
     "public_tool_name",
+    # the runtime
+    "RuntimeClient",
+    "RuntimeServer",
+    "RemoteSession",
+    "JsonRpcTransport",
+    "TransportClosed",
     # cancellation
     "CancelSignal",
     "CancelledError",

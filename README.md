@@ -261,12 +261,19 @@ uv run pytest tests  # the suite
   inherited value always wins and a `.env` may *not* set a variable that decided
   how the process boots; and profiles as **data**, fully resolved before
   anything mounts, so a typo in entry nine cannot leave eight plugins running.
+- **The runtime** (`pydsh.runtime`): the same SDK surface, one process away.
+  Newline-delimited JSON-RPC 2.0 both ways — `RuntimeClient` spawns
+  `python -m pydsh.runtime` (or takes a transport of its own), and session
+  events arrive as notifications *while* the turn runs, so a caller can stream
+  a conversation it is not hosting. Inbound requests are served concurrently,
+  which is what lets a handler call back into its peer instead of deadlocking
+  against the loop that would deliver the answer.
 - **Cancellation** (`pydsh.cancel`): `AbortSignal` semantics, with two scopes
   per agent. `cancel()` stops the work in flight and leaves the agent usable;
   only a lifetime abort — the caller tearing down, or the loop being unmounted
   — ends it.
 
-Still to come: the JSON-RPC server, WebSocket transport, gateway and CLI. Everything else in
+Still to come: the WebSocket transport, the HTTP gateway, and the CLI. Everything else in
 [`docs/design/service-catalogue.md`](docs/design/service-catalogue.md) is
 ported.
 

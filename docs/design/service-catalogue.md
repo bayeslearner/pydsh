@@ -158,7 +158,8 @@ prompt. A port that skips them loses the proof that the injection seam works.
 | Module | Class | Note |
 |---|---|---|
 | `sdk` (in-process) | app-layer | `Harness` / `HarnessSession` / `RunResult`. Named for what it is rather than after a vendor — this repo is a general core. The JSON-RPC form is queued behind it |
-| `client` / `server` / `protocol` / `bridge` / `gateway` / `websocket` | app-layer | the JSON-RPC/WebSocket/gateway tier |
+| `protocol` / `server` / `client` | app-layer | `pydsh.runtime`: newline-delimited JSON-RPC 2.0, a booted context behind it, and a client that spawns one. Inbound requests are dispatched as tasks — the reference awaits them inside the read loop, which deadlocks the moment a handler calls back — and the stdin hand-off goes through `call_soon_threadsafe`, because `asyncio.Queue` is not thread-safe |
+| `websocket` / `gateway` / `bridge` | app-layer | queued behind the stdio runtime |
 | `cli` | app-layer | the harness CLI |
 | `env` / `profile` / `loader` / `home_paths` | app-layer | `pydsh.boot`: layered `.env` (bootstrap-prefixed names refused from a file), profiles as data resolved before anything mounts, and one home resolution. `watcher` is **not** ported — plugkit owns plugin lifecycle and a config watcher is a consumer's choice |
 | `home_paths` / `launch_environment` | app-layer | install/locate helpers |
