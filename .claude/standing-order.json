@@ -1,7 +1,9 @@
 {
-  "active": true,
+  "active": false,
   "goal": "Port the DeepSeek Harness service layer to catalogue parity.",
   "done_when": "Every row in docs/design/service-catalogue.md is either ported and covered by tests, or recorded there as deliberately out of scope with the reason. The route is docs/history/2026-08-24-parity-route.md; sprints run in order and each closes CLOSED/SHIPPED with the suite green.",
   "note": "Standing order given 2026-08-24: 'loop until you reach parity'. Finishing a sprint is not finishing the order. Do not end a turn to report progress or to ask whether to continue.",
+  "satisfied_on": "2026-08-25",
+  "satisfied_by": "Sprints 03-22, closed CLOSED/SHIPPED in order. All 84 dsh-python modules accounted for in docs/design/service-catalogue.md: 77 ported, 7 recorded there as out of scope with the reason. 1264 tests green. Deactivated because the done_when is met, not because the work was stopped.",
   "max_blocks": 200
 }
